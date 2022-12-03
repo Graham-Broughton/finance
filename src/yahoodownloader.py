@@ -1,7 +1,7 @@
+import exchange_calendars as tc
 import numpy as np
 import pandas as pd
 import yfinance as yf
-import exchange_calendars as tc
 from stockstats import StockDataFrame as Sdf
 
 
@@ -18,16 +18,11 @@ class YahooDownloader:
 
         data = pd.DataFrame()
         for ticker in ticker_list:
-            tmp = yf.download(
-                ticker,
-                self.start_date,
-                self.end_date,
-                self.interval
-            )
-            tmp['tic'] = ticker
+            tmp = yf.download(ticker, self.start_date, self.end_date, self.interval)
+            tmp["tic"] = ticker
             data = data.append(tmp)
         data.reset_index(inplace=True)
-        columns = ['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume', 'tic']
+        columns = ["Date", "Open", "High", "Low", "Close", "Adj Close", "Volume", "tic"]
         data = data.loc[:, data.columns.isin(columns)]
         # convert the column names to standardized names
         data.columns = [
@@ -51,37 +46,35 @@ class YahooDownloader:
         data = data.sort_values(by=["date", "tic"]).reset_index(drop=True)
         return data
 
-    def get_trading_days(
-        self, start_date: str, end_date: str
-    ):
-        nyse = tc.get_calender('NYSE')
+    def get_trading_days(self, start_date: str, end_date: str):
+        nyse = tc.get_calender("NYSE")
         df = nyse.sessions_in_range(
             pd.Timestamp(start_date),
             pd.Timestamp(end_date),
         )
-        trading_days = df.strftime('%Y-%m-%d').to_list()
+        trading_days = df.strftime("%Y-%m-%d").to_list()
         return trading_days
 
-    def clean_data(
-        self, data: pd.DataFrame
-    ):
+    def clean_data(self, data: pd.DataFrame):
         df = data.copy()
-        df = df.rename({'date': 'time'}, axis=1)
+        df = df.rename({"date": "time"}, axis=1)
         time_interval = self.interval
-        tickers = df['tic'].unique().values
+        tickers = df["tic"].unique()
 
         # get time index
         trading_days = self.get_trading_days(self.start, self.end)
-        if time_interval == '1D':
+        if time_interval == "1D":
             times = trading_days
-        elif time_interval == '1m':
+        elif time_interval == "1m":
             # Define and add NY's offset from UST and fill it in with minutes
             NY = "America/New_York"
-            delta = np.timedelta64(9, 'h') + np.timedelta64(30, 'm')
-            newdt = np.array(trading_days, dtype='datetime64') + delta
-            dt = np.array([np.arange(
-                day, (day + np.timedelta64(390, 'm')),
-                dtype='datetime64') for day in newdt]
+            delta = np.timedelta64(9, "h") + np.timedelta64(30, "m")
+            newdt = np.array(trading_days, dtype="datetime64") + delta
+            dt = np.array(
+                [
+                    np.arange(day, (day + np.timedelta64(390, "m")), dtype="datetime64")
+                    for day in newdt
+                ]
             )
             df = pd.to_datetime(dt).reshape(-1, 1).tz_localize(NY)
             times = df.to_list()
@@ -94,16 +87,16 @@ class YahooDownloader:
             print(("Clean data for ") + tic)
             # Create empty df using the times as index
             tmp_df = pd.DataFrame(
-                columns=['open', 'high', 'low', 'close', 'adjclose', 'volume'],
-                index=times
+                columns=["open", "high", "low", "close", "adjclose", "volume"],
+                index=times,
             )
-            tic_df = df[df['tic'] == tic]
+            tic_df = df[df["tic"] == tic]
             for i in range(tic_df.shape[0]):
-                tmp_df.loc[tic_df.iloc[i]['time']] = tic_df.iloc[i][
-                    ['open', 'high', 'low', 'close', 'adjclose', 'volume']
+                tmp_df.loc[tic_df.iloc[i]["time"]] = tic_df.iloc[i][
+                    ["open", "high", "low", "close", "adjclose", "volume"]
                 ]
 
-            if str(tmp_df.iloc[0]['close']) == 'nan':
+            if str(tmp_df.iloc[0]["close"]) == "nan":
                 print("NaN data on start date, fill using first valid data.")
                 for i in range(tmp_df.shape[0]):
                     if str(tmp_df.iloc[i]["close"]) != "nan":
@@ -135,9 +128,9 @@ class YahooDownloader:
             #             previous_adjcp,
             #             0.0,
             #         ]
-            nan_df = tmp_df[tmp_df['close'] == 'nan'].index
-            tmp_df.loc[nan_df, 'volume'] = 0.0
-            tmp_df = tmp_df.replace('nan', method='ffill')
+            nan_df = tmp_df[tmp_df["close"] == "nan"].index
+            tmp_df.loc[nan_df, "volume"] = 0.0
+            tmp_df = tmp_df.replace("nan", method="ffill")
 
             # merge single ticker data to new DataFrame
             tmp_df = tmp_df.astype(float)
@@ -218,13 +211,13 @@ class YahooDownloader:
             ]
             # Drop tickers which has number missing values more than the "oldest" ticker
             filtered_hist_price = hist_price.iloc[
-                hist_price.isna().sum().min():
+                hist_price.isna().sum().min() :
             ].dropna(axis=1)
 
             cov_temp = filtered_hist_price.cov()
-            current_temp = current_price[
-                [x for x in filtered_hist_price]
-                ] - np.mean(filtered_hist_price, axis=0)
+            current_temp = current_price[[x for x in filtered_hist_price]] - np.mean(
+                filtered_hist_price, axis=0
+            )
             temp = current_temp.values.dot(np.linalg.pinv(cov_temp)).dot(
                 current_temp.values.T
             )
@@ -265,9 +258,7 @@ class YahooDownloader:
         df = df.sort_values(["time", "tic"]).reset_index(drop=True)
         return df
 
-    def df_to_array(
-        self, df: pd.DataFrame, tech_indicator_list: list, if_vix: bool
-    ):
+    def df_to_array(self, df: pd.DataFrame, tech_indicator_list: list, if_vix: bool):
         """transform final df to numpy arrays"""
         unique_ticker = df.tic.unique()
         print(unique_ticker)
