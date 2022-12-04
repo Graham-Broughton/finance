@@ -144,7 +144,7 @@ class YahooDownloader:
         print('Data clean all finished!')
         return new_df
 
-    def add_technical_indicator(self, data, tech_indicator_list):
+    def add_indicators(self, data, indicator_list):
         """
         calculate technical indicators
         use stockstats package to add technical inidactors
@@ -156,7 +156,7 @@ class YahooDownloader:
         stock = Sdf.retype(df.copy())
         unique_ticker = stock.tic.unique()
 
-        for indicator in tech_indicator_list:
+        for indicator in indicator_list:
             indicator_df = pd.DataFrame()
             for i in range(len(unique_ticker)):
                 try:
@@ -258,7 +258,7 @@ class YahooDownloader:
         df = df.sort_values(['time', 'tic']).reset_index(drop=True)
         return df
 
-    def df_to_array(self, df: pd.DataFrame, tech_indicator_list: list, if_vix: bool):
+    def df_to_array(self, df: pd.DataFrame, indicator_list: list, if_vix: bool):
         """transform final df to numpy arrays"""
         unique_ticker = df.tic.unique()
         print(unique_ticker)
@@ -266,7 +266,7 @@ class YahooDownloader:
         for tic in unique_ticker:
             if if_first_time:
                 price_array = df[df.tic == tic][['adjcp']].values
-                tech_array = df[df.tic == tic][tech_indicator_list].values
+                tech_array = df[df.tic == tic][indicator_list].values
                 if if_vix:
                     turbulence_array = df[df.tic == tic]['vix'].values
                 else:
@@ -277,7 +277,7 @@ class YahooDownloader:
                     [price_array, df[df.tic == tic][['adjcp']].values]
                 )
                 tech_array = np.hstack(
-                    [tech_array, df[df.tic == tic][tech_indicator_list].values]
+                    [tech_array, df[df.tic == tic][indicator_list].values]
                 )
         assert price_array.shape[0] == tech_array.shape[0]
         assert tech_array.shape[0] == turbulence_array.shape[0]
