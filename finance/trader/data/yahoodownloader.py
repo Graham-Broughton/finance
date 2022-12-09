@@ -22,7 +22,6 @@ class YahooDownloader:
         Download ticker data from Yahoo Finance.
 
         Args:
-            self: write your description
             start_date: write your description
             end_date: write your description
             ticker_list: write your description

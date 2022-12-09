@@ -83,7 +83,6 @@ class StockTradingEnvCashpenalty(gym.Env):
         DataFrame to hold data for the stock and commodity markets.
 
         Args:
-            self: write your description
             df: write your description
             buy_cost_pct: write your description
             sell_cost_pct: write your description
@@ -142,10 +141,6 @@ class StockTradingEnvCashpenalty(gym.Env):
     def seed(self, seed=None):
         """
         Set random seed for the simulation.
-
-        Args:
-            self: write your description
-            seed: write your description
         """
         if seed is None:
             seed = int(round(time.time() * 1000))
@@ -155,9 +150,6 @@ class StockTradingEnvCashpenalty(gym.Env):
     def current_step(self):
         """
         Returns the current step in the date range.
-
-        Args:
-            self: write your description
         """
         return self.date_index - self.starting_point
 
@@ -165,9 +157,6 @@ class StockTradingEnvCashpenalty(gym.Env):
     def cash_on_hand(self):
         """
         Return amount of cash held at current timestep.
-
-        Args:
-            self: write your description
         """
         # amount of cash held at current timestep
         return self.state_memory[-1][0]
@@ -176,9 +165,6 @@ class StockTradingEnvCashpenalty(gym.Env):
     def holdings(self):
         """
         Return quantity of shares held at current timestep.
-
-        Args:
-            self: write your description
         """
         # Quantity of shares held at current timestep
         return self.state_memory[-1][1: len(self.assets) + 1]
@@ -187,18 +173,12 @@ class StockTradingEnvCashpenalty(gym.Env):
     def closings(self):
         """
         Closings of the catalogue.
-
-        Args:
-            self: write your description
         """
         return np.array(self.get_date_vector(self.date_index, cols=['close']))
 
     def reset(self):
         """
         Reset the simulation to its initial state.
-
-        Args:
-            self: write your description
         """
         self.seed()
         self.sum_trades = 0
@@ -231,9 +211,8 @@ class StockTradingEnvCashpenalty(gym.Env):
         Returns a list of daily information columns for the given date.
 
         Args:
-            self: write your description
-            date: write your description
-            cols: write your description
+            date: the date to return information on
+            cols: the columns to return
         """
         if (cols is None) and (self.cached_data is not None):
             return self.cached_data[date]
@@ -254,9 +233,8 @@ class StockTradingEnvCashpenalty(gym.Env):
         Log the current step and return the terminal state.
 
         Args:
-            self: write your description
-            reason: write your description
-            reward: write your description
+            reason: the reason for logging and returning terminal state
+            reward: reward of current step
         """
         state = self.state_memory[-1]
         self.log_step(reason=reason, terminal_reward=reward)
@@ -294,9 +272,8 @@ class StockTradingEnvCashpenalty(gym.Env):
         Logs a step of the episode.
 
         Args:
-            self: write your description
-            reason: write your description
-            terminal_reward: write your description
+            reason: reason for logging the step
+            terminal_reward: the last reward available
         """
 
         if terminal_reward is None:
@@ -323,9 +300,6 @@ class StockTradingEnvCashpenalty(gym.Env):
     def log_header(self):
         """
         Prints the header of the log file.
-
-        Args:
-            self: write your description
         """
         if self.printed_header is False:
             self.template = '{0:4}|{1:4}|{2:15}|{3:15}|{4:15}|{5:10}|{6:10}|{7:10}'
@@ -347,9 +321,6 @@ class StockTradingEnvCashpenalty(gym.Env):
     def get_reward(self):
         """
         Calculates the reward.
-
-        Args:
-            self: write your description
         """
         if self.current_step == 0:
             return 0
@@ -406,8 +377,8 @@ class StockTradingEnvCashpenalty(gym.Env):
         return actions
 
     def step(self, actions):
-        # let's just log what we're doing in terms of max actions at each step.
         self.sum_trades += np.sum(np.abs(actions))
+        # let's just log what we're doing in terms of max actions at each step.
         self.log_header()
         # print if it's time.
         if (self.current_step + 1) % self.print_verbosity == 0:
@@ -482,15 +453,10 @@ class StockTradingEnvCashpenalty(gym.Env):
     def get_sb_env(self):
         """
         Get a new vector environment and a copy of the current one.
-
-        Args:
-            self: write your description
         """
         def get_self():
             """
             Return the current instance of the class.
-
-            Args:
             """
             return deepcopy(self)
 
@@ -503,14 +469,11 @@ class StockTradingEnvCashpenalty(gym.Env):
         Get multiproc environment for the current object.
 
         Args:
-            self: write your description
-            n: write your description
+            n: number of subprocesses to create
         """
         def get_self():
             """
             Return the current instance of the class.
-
-            Args:
             """
             return deepcopy(self)
 
@@ -521,9 +484,6 @@ class StockTradingEnvCashpenalty(gym.Env):
     def save_asset_memory(self):
         """
         Returns a DataFrame containing information about the current step and the current date.
-
-        Args:
-            self: write your description
         """
         if self.current_step == 0:
             return None
@@ -536,9 +496,6 @@ class StockTradingEnvCashpenalty(gym.Env):
     def save_action_memory(self):
         """
         Returns a DataFrame with the actions and transaction memory.
-
-        Args:
-            self: write your description
         """
         if self.current_step == 0:
             return None

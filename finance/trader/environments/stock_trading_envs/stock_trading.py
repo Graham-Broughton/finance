@@ -46,7 +46,6 @@ class StockTradingEnv(gym.Env):
         Initializes the results object
 
         Args:
-            self: write your description
             df: write your description
             pd: write your description
             DataFrame: write your description
@@ -130,15 +129,12 @@ class StockTradingEnv(gym.Env):
         Perform stock sell actions on the specified index.
 
         Args:
-            self: write your description
-            index: write your description
-            action: write your description
+            index: index ofo stock
+            action: magnitude of sell action
         """
         def _do_sell_normal():
             """
             Do the sell action if the stock is not able to sell in that day.
-
-            Args:
             """
             if (
                 self.state[index + 2 * self.stock_dim + 1] != True
@@ -209,15 +205,12 @@ class StockTradingEnv(gym.Env):
         Performs a buy action on the stock at the given index.
 
         Args:
-            self: write your description
-            index: write your description
-            action: write your description
+            index: index of ticker
+            action: magnitude of buy action
         """
         def _do_buy():
             """
             Calculates the amount of shares to buy.
-
-            Args:
             """
             if (
                 self.state[index + 2 * self.stock_dim + 1] != True
@@ -263,9 +256,6 @@ class StockTradingEnv(gym.Env):
     def _make_plot(self):
         """
         Makes the plot
-
-        Args:
-            self: write your description
         """
         plt.plot(self.asset_memory, 'r')
         plt.savefig(f'results/account_value_trade_{self.episode}.png')
@@ -276,8 +266,7 @@ class StockTradingEnv(gym.Env):
         Take one step of simulation.
 
         Args:
-            self: write your description
-            actions: write your description
+            actions: actions to take this step
         """
         self.terminal = self.day >= len(self.df.index.unique()) - 1
         if self.terminal:
@@ -417,9 +406,6 @@ class StockTradingEnv(gym.Env):
     def reset(self):
         """
         Reset simulation state.
-
-        Args:
-            self: write your description
         """
         # initiate state
         self.state = self._initiate_state()
@@ -459,7 +445,6 @@ class StockTradingEnv(gym.Env):
         Render the state of the widget.
 
         Args:
-            self: write your description
             mode: write your description
             close: write your description
         """
@@ -468,9 +453,6 @@ class StockTradingEnv(gym.Env):
     def _initiate_state(self):
         """
         Create the initial state for the stock.
-
-        Args:
-            self: write your description
         """
         if self.initial:
             # For Initial State
@@ -518,9 +500,6 @@ class StockTradingEnv(gym.Env):
     def _update_state(self):
         """
         Update state of the dataframe
-
-        Args:
-            self: write your description
         """
         if len(self.df.tic.unique()) > 1:
             # for multiple stock
@@ -548,9 +527,6 @@ class StockTradingEnv(gym.Env):
     def _get_date(self):
         """
         Get the date of the dataframe
-
-        Args:
-            self: write your description
         """
         if len(self.df.tic.unique()) > 1:
             date = self.data.date.unique()[0]
@@ -562,9 +538,6 @@ class StockTradingEnv(gym.Env):
     def save_state_memory(self):
         """
         Saves state memory in a readable format.
-
-        Args:
-            self: write your description
         """
         if len(self.df.tic.unique()) > 1:
             # date and close price length must match actions length
@@ -597,9 +570,6 @@ class StockTradingEnv(gym.Env):
     def save_asset_memory(self):
         """
         Returns a pandas DataFrame with the date and asset memory data.
-
-        Args:
-            self: write your description
         """
         date_list = self.date_memory
         asset_list = self.asset_memory
@@ -613,9 +583,6 @@ class StockTradingEnv(gym.Env):
     def save_action_memory(self):
         """
         Save actions in memory.
-
-        Args:
-            self: write your description
         """
         if len(self.df.tic.unique()) > 1:
             # date and close price length must match actions length
@@ -637,10 +604,6 @@ class StockTradingEnv(gym.Env):
     def _seed(self, seed=None):
         """
         Seed the generator with the given seed.
-
-        Args:
-            self: write your description
-            seed: write your description
         """
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
@@ -648,9 +611,6 @@ class StockTradingEnv(gym.Env):
     def get_sb_env(self):
         """
         Get a vector environment and a vector obs of the problem.
-
-        Args:
-            self: write your description
         """
         e = DummyVecEnv([lambda: self])
         obs = e.reset()
