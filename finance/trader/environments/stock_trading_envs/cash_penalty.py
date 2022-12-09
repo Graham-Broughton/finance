@@ -72,12 +72,12 @@ class StockTradingEnvCashpenalty(gym.Env):
         turbulence_threshold=None,
         print_verbosity=10,
         initial_amount=1e6,
-        daily_information_cols=['open', 'close', 'high', 'low', 'volume'],
+        daily_information_cols=None,
         cache_indicator_data=True,
         cash_penalty_proportion=0.1,
         random_start=True,
         patient=False,
-        currency='$',
+        currency='$'
     ):
         """
         DataFrame to hold data for the stock and commodity markets.
@@ -100,6 +100,8 @@ class StockTradingEnvCashpenalty(gym.Env):
             patient: [T/F]
             currency: which currency to use
         """
+        if daily_information_cols is None:
+            daily_information_cols = ['open', 'close', 'high', 'low', 'volume']
         self.df = df
         self.stock_col = 'tic'
         self.assets = df[self.stock_col].unique()
@@ -216,17 +218,16 @@ class StockTradingEnvCashpenalty(gym.Env):
         """
         if (cols is None) and (self.cached_data is not None):
             return self.cached_data[date]
-        else:
-            date = self.dates[date]
-            if cols is None:
-                cols = self.daily_information_cols
-            trunc_df = self.df.loc[[date]]
-            v = []
-            for a in self.assets:
-                subset = trunc_df[trunc_df[self.stock_col] == a]
-                v += subset.loc[date, cols].tolist()
-            assert len(v) == len(self.assets) * len(cols)
-            return v
+        date = self.dates[date]
+        if cols is None:
+            cols = self.daily_information_cols
+        trunc_df = self.df.loc[[date]]
+        v = []
+        for a in self.assets:
+            subset = trunc_df[trunc_df[self.stock_col] == a]
+            v += subset.loc[date, cols].tolist()
+        assert len(v) == len(self.assets) * len(cols)
+        return v
 
     def return_terminal(self, reason='Last Date', reward=0):
         """
@@ -324,14 +325,13 @@ class StockTradingEnvCashpenalty(gym.Env):
         """
         if self.current_step == 0:
             return 0
-        else:
-            assets = self.account_information['total_assets'][-1]
-            cash = self.account_information['cash'][-1]
-            cash_penalty = max(0, (assets * self.cash_penalty_proportion - cash))
-            assets -= cash_penalty
-            reward = (assets / self.initial_amount) - 1
-            reward /= self.current_step
-            return reward
+        assets = self.account_information['total_assets'][-1]
+        cash = self.account_information['cash'][-1]
+        cash_penalty = max(0, (assets * self.cash_penalty_proportion - cash))
+        assets -= cash_penalty
+        reward = (assets / self.initial_amount) - 1
+        reward /= self.current_step
+        return reward
 
     def get_transactions(self, actions):
         """
@@ -368,11 +368,9 @@ class StockTradingEnvCashpenalty(gym.Env):
         actions = np.maximum(actions, -np.array(self.holdings))
 
         # deal with turbulence
-        if self.turbulence_threshold is not None:
-            # if turbulence goes over threshold, just clear out all positions
-            if self.turbulence >= self.turbulence_threshold:
-                actions = -(np.array(self.holdings))
-                self.log_step(reason='TURBULENCE')
+        if self.turbulence_threshold is not None and self.turbulence >= self.turbulence_threshold:
+            actions = -(np.array(self.holdings))
+            self.log_step(reason='TURBULENCE')
 
         return actions
 
@@ -388,67 +386,70 @@ class StockTradingEnvCashpenalty(gym.Env):
             # if we hit the end, set reward to total gains (or losses)
             return self.return_terminal(reward=self.get_reward())
         else:
-            """
+            return self._extracted_from_step_13(actions)
+
+    # TODO Rename this here and in `step`
+    def _extracted_from_step_13(self, actions):
+        """
             First, we need to compute values of holdings, save these, and log everything.
             Then we can reward our model for its earnings.
             """
-            # compute value of cash + assets
-            begin_cash = self.cash_on_hand
-            assert min(self.holdings) >= 0
-            asset_value = np.dot(self.holdings, self.closings)
-            # log the values of cash, assets, and total assets
-            self.account_information['cash'].append(begin_cash)
-            self.account_information['asset_value'].append(asset_value)
-            self.account_information['total_assets'].append(begin_cash + asset_value)
+        # compute value of cash + assets
+        begin_cash = self.cash_on_hand
+        assert min(self.holdings) >= 0
+        asset_value = np.dot(self.holdings, self.closings)
+        # log the values of cash, assets, and total assets
+        self.account_information['cash'].append(begin_cash)
+        self.account_information['asset_value'].append(asset_value)
+        self.account_information['total_assets'].append(begin_cash + asset_value)
 
-            # compute reward once we've computed the value of things!
-            reward = self.get_reward()
-            self.account_information['reward'].append(reward)
+        # compute reward once we've computed the value of things!
+        reward = self.get_reward()
+        self.account_information['reward'].append(reward)
 
-            # Now, let's get down to business at hand.
-            transactions = self.get_transactions(actions)
+        # Now, let's get down to business at hand.
+        transactions = self.get_transactions(actions)
 
-            # compute our proceeds from sells, and add to cash
-            sells = -np.clip(transactions, -np.inf, 0)
-            proceeds = np.dot(sells, self.closings)
-            costs = proceeds * self.sell_cost_pct
-            coh = begin_cash + proceeds
-            # compute the cost of our buys
-            buys = np.clip(transactions, 0, np.inf)
-            spend = np.dot(buys, self.closings)
-            costs += spend * self.buy_cost_pct
-            # if we run out of cash...
-            if (spend + costs) > coh:
-                if self.patient:
-                    # ... just don't buy anything until we got additional cash
-                    self.log_step(reason='CASH SHORTAGE')
-                    transactions = np.where(transactions > 0, 0, transactions)
-                    spend = 0
-                    costs = 0
-                else:
-                    # ... end the cycle and penalize
-                    return self.return_terminal(
-                        reason='CASH SHORTAGE', reward=self.get_reward()
-                    )
-            self.transaction_memory.append(
-                transactions
-            )  # capture what the model's could do
-            # verify we didn't do anything impossible here
-            assert (spend + costs) <= coh
-            # update our holdings
-            coh = coh - spend - costs
-            holdings_updated = self.holdings + transactions
-            self.date_index += 1
-            if self.turbulence_threshold is not None:
-                self.turbulence = self.get_date_vector(
-                    self.date_index, cols=['turbulence']
-                )[0]
-            # Update State
-            state = (
-                [coh] + list(holdings_updated) + self.get_date_vector(self.date_index)
-            )
-            self.state_memory.append(state)
-            return state, reward, False, {}
+        # compute our proceeds from sells, and add to cash
+        sells = -np.clip(transactions, -np.inf, 0)
+        proceeds = np.dot(sells, self.closings)
+        costs = proceeds * self.sell_cost_pct
+        coh = begin_cash + proceeds
+        # compute the cost of our buys
+        buys = np.clip(transactions, 0, np.inf)
+        spend = np.dot(buys, self.closings)
+        costs += spend * self.buy_cost_pct
+        # if we run out of cash...
+        if (spend + costs) > coh:
+            if not self.patient:
+                # ... end the cycle and penalize
+                return self.return_terminal(
+                    reason='CASH SHORTAGE', reward=self.get_reward()
+                )
+            # ... just don't buy anything until we got additional cash
+            self.log_step(reason='CASH SHORTAGE')
+            transactions = np.where(transactions > 0, 0, transactions)
+            spend = 0
+            costs = 0
+        self.transaction_memory.append(
+            transactions
+        )  # capture what the model's could do
+        # verify we didn't do anything impossible here
+        assert (spend + costs) <= coh
+        # update our holdings
+        coh = coh - spend - costs
+        holdings_updated = self.holdings + transactions
+        self.date_index += 1
+        if self.turbulence_threshold is not None:
+            self.turbulence = self.get_date_vector(
+                self.date_index, cols=['turbulence']
+            )[0]
+        # Update State
+        state = (
+            [coh] + list(holdings_updated) + self.get_date_vector(self.date_index)
+        )
+        self.state_memory.append(state)
+        return state, reward, False, {}
 
     def get_sb_env(self):
         """
@@ -487,11 +488,10 @@ class StockTradingEnvCashpenalty(gym.Env):
         """
         if self.current_step == 0:
             return None
-        else:
-            self.account_information['date'] = self.dates[
-                -len(self.account_information['cash']):
-            ]
-            return pd.DataFrame(self.account_information)
+        self.account_information['date'] = self.dates[
+            -len(self.account_information['cash']):
+        ]
+        return pd.DataFrame(self.account_information)
 
     def save_action_memory(self):
         """
