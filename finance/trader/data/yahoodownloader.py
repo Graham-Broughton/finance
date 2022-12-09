@@ -9,9 +9,6 @@ class YahooDownloader:
     def __init__(self):
         """
         Initialize the class with the default values.
-
-        Args:
-            self: write your description
         """
         pass
 
@@ -22,10 +19,10 @@ class YahooDownloader:
         Download ticker data from Yahoo Finance.
 
         Args:
-            start_date: write your description
-            end_date: write your description
-            ticker_list: write your description
-            interval: write your description
+            start_date: start date
+            end_date: end date
+            ticker_list: list of stock tickers
+            interval: interval to trade on
         """
         self.start = start_date
         self.end = end_date
@@ -66,9 +63,8 @@ class YahooDownloader:
         Get a list of trading days between the given dates.
 
         Args:
-            self: write your description
-            start_date: write your description
-            end_date: write your description
+            start_date: start date
+            end_date: end date
         """
         nyse = tc.get_calendar('NYSE')
         df = nyse.sessions_in_range(
@@ -83,10 +79,7 @@ class YahooDownloader:
         Clean dataframe for trading.
 
         Args:
-            self: write your description
-            data: write your description
-            pd: write your description
-            DataFrame: write your description
+            data: the stock dataframe
         """
         df = data.copy()
         df = df.rename({'date': 'time'}, axis=1)
