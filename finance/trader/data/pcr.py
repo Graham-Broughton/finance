@@ -12,8 +12,6 @@ from selenium import webdriver
 def driversetup():
     """
     Setup webdriver.
-
-    Args:
     """
     options = webdriver.ChromeOptions()
     # run Selenium in headless mode
@@ -41,8 +39,8 @@ def pagesource(url, driver):
     Get the page source of a web page.
 
     Args:
-        url: write your description
-        driver: write your description
+        url: Website URL
+        driver: webdriver
     """
     driver = driver
     driver.get(url)
@@ -56,7 +54,7 @@ def get_info(date):
     Get the date and the precision of the precision measure.
 
     Args:
-        date: write your description
+        date: date in datetime format
     """
     url = 'https://markets.cboe.com/us/options/market_statistics/daily/?mkt=cone&dt=%s'
     datestr = date.strftime('%Y-%m-%d')
@@ -75,7 +73,7 @@ def get_df(path):
     Get dataframe from a CSV file
 
     Args:
-        path: write your description
+        path: absolute path to csv folder
     """
     new_df = pd.read_csv(path + 'csvs/pcr.csv', parse_dates=['date'])
     start_date = new_df.tail(1)['date'].tolist()[0].date() + datetime.timedelta(days=1)

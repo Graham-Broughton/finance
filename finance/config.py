@@ -14,6 +14,9 @@ VAL_END = '2021-12-31'
 TEST_START = '2022-01-01'
 TEST_END = '2022-12-01'
 
+PATH_OF_DATA = 'csvs'
+READ_DATA_FROM_LOCAL = 1  # 0 or 1
+
 # Defining indicators to implement
 INDICATORS = [
     'macd',

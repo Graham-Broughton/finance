@@ -33,10 +33,10 @@ def data_split(df, start, end, target_date_col='date'):
 
 def convert_to_datetime(time):
     """
-    Convert time to datetime. datetime.
+    Convert time string to datetime. datetime.
 
     Args:
-        time: write your description
+        time: time repreesnted in string
     """
     time_fmt = '%Y-%m-%dT%H:%M:%S'
     if isinstance(time, str):
@@ -51,7 +51,7 @@ class FeatureEngineer:
         use_technical_indicator : boolean
             we technical indicator or not
         tech_indicator_list : list
-            a list of technical indicator names (modified from neofinrl_config.py)
+            a list of technical indicator names
         use_turbulence : boolean
             use turbulence index or not
         user_defined_feature:boolean
@@ -76,14 +76,12 @@ class FeatureEngineer:
         Initializes the configuration.
 
         Args:
-            self: write your description
-            use_technical_indicator: write your description
-            tech_indicator_list: write your description
-            config: write your description
-            INDICATORS: write your description
-            use_vix: write your description
-            use_turbulence: write your description
-            user_defined_feature: write your description
+            use_technical_indicator: Boolean
+            tech_indicator_list: Boolean
+            INDICATORS: list of technical indicators to use from config file
+            use_vix: Boolean
+            use_turbulence: Boolean
+            user_defined_feature: Boolean
         """
         self.use_technical_indicator = use_technical_indicator
         self.tech_indicator_list = tech_indicator_list
@@ -175,7 +173,7 @@ class FeatureEngineer:
 
     def add_user_defined_feature(self, data):
         """
-         add user defined features
+        add user defined features
         :param data: (df) pandas dataframe
         :return: (df) pandas dataframe
         """
