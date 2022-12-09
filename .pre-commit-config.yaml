@@ -28,5 +28,5 @@ repos:
     rev: 6.0.0
     hooks:
       - id: flake8
-        args: ['--max-line-length=100', '--ignore=E203']
+        args: ['--max-line-length=100', '--ignore=E203 E722 E712']
         exclude: 'pcr_scrap.py'
