@@ -18,7 +18,7 @@ class YahooDownloader:
 
         data = pd.DataFrame()
         for ticker in ticker_list:
-            tmp = yf.download(ticker, self.start_date, self.end_date, self.interval)
+            tmp = yf.download(ticker, self.start, self.end, self.interval)
             tmp['tic'] = ticker
             data = data.append(tmp)
         data.reset_index(inplace=True)
@@ -47,7 +47,7 @@ class YahooDownloader:
         return data
 
     def get_trading_days(self, start_date: str, end_date: str):
-        nyse = tc.get_calender('NYSE')
+        nyse = tc.get_calendar('NYSE')
         df = nyse.sessions_in_range(
             pd.Timestamp(start_date),
             pd.Timestamp(end_date),
