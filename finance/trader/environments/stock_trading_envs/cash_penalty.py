@@ -378,6 +378,13 @@ class StockTradingEnvCashpenalty(gym.Env):
         return actions
 
     def step(self, actions):
+        """
+        Take a step in the simulation.
+
+        Args:
+            self: write your description
+            actions: write your description
+        """
         self.sum_trades += np.sum(np.abs(actions))
         # let's just log what we're doing in terms of max actions at each step.
         self.log_header()
