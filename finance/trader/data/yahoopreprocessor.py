@@ -4,11 +4,27 @@ import yfinance as yf
 
 class YahooDownloader:
     def __init__(self, start_date: str, end_date: str, ticker_list: list):
+        """
+        Initialize the date range
+
+        Args:
+            self: write your description
+            start_date: write your description
+            end_date: write your description
+            ticker_list: write your description
+        """
         self.start_date = start_date
         self.end_date = end_date
         self.ticker_list = ticker_list
 
     def fetch_data(self, proxy=None):
+        """
+        Fetch the latest data from Yahoo Finance and return it as a pandas DataFrame.
+
+        Args:
+            self: write your description
+            proxy: write your description
+        """
         # Download and save the data in a pandas DataFrame:
         data_df = pd.DataFrame()
         for tic in self.ticker_list:
@@ -51,6 +67,13 @@ class YahooDownloader:
         return data_df
 
     def select_equal_rows_stock(self, df):
+        """
+        Select only rows with equal counts that have a stock value greater than the mean value.
+
+        Args:
+            self: write your description
+            df: write your description
+        """
         df_check = df.tic.value_counts()
         df_check = pd.DataFrame(df_check).reset_index()
         df_check.columns = ['tic', 'counts']
