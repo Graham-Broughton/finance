@@ -72,12 +72,12 @@ class StockTradingEnvCashpenalty(gym.Env):
         turbulence_threshold=None,
         print_verbosity=10,
         initial_amount=1e6,
-        daily_information_cols=['open', 'close', 'high', 'low', 'volume'],
+        daily_information_cols=None,
         cache_indicator_data=True,
         cash_penalty_proportion=0.1,
         random_start=True,
         patient=False,
-        currency='$',
+        currency='$'
     ):
         """
         DataFrame to hold data for the stock and commodity markets.
@@ -100,6 +100,8 @@ class StockTradingEnvCashpenalty(gym.Env):
             patient: [T/F]
             currency: which currency to use
         """
+        if daily_information_cols is None:
+            daily_information_cols = ['open', 'close', 'high', 'low', 'volume']
         self.df = df
         self.stock_col = 'tic'
         self.assets = df[self.stock_col].unique()
@@ -385,6 +387,11 @@ class StockTradingEnvCashpenalty(gym.Env):
         if self.date_index == len(self.dates) - 1:
             # if we hit the end, set reward to total gains (or losses)
             return self.return_terminal(reward=self.get_reward())
+        else:
+            return self._extracted_from_step_13(actions)
+
+    # TODO Rename this here and in `step`
+    def _extracted_from_step_13(self, actions):
         """
             First, we need to compute values of holdings, save these, and log everything.
             Then we can reward our model for its earnings.
@@ -414,7 +421,7 @@ class StockTradingEnvCashpenalty(gym.Env):
         buys = np.clip(transactions, 0, np.inf)
         spend = np.dot(buys, self.closings)
         costs += spend * self.buy_cost_pct
-            # if we run out of cash...
+        # if we run out of cash...
         if (spend + costs) > coh:
             if not self.patient:
                 # ... end the cycle and penalize
