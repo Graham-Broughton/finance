@@ -8,10 +8,9 @@ class YahooDownloader:
         Initialize the date range
 
         Args:
-            self: write your description
-            start_date: write your description
-            end_date: write your description
-            ticker_list: write your description
+            start_date: starting date
+            end_date: ending date
+            ticker_list: list of stock tickers
         """
         self.start_date = start_date
         self.end_date = end_date
@@ -22,8 +21,7 @@ class YahooDownloader:
         Fetch the latest data from Yahoo Finance and return it as a pandas DataFrame.
 
         Args:
-            self: write your description
-            proxy: write your description
+            proxy: proxy to download from
         """
         # Download and save the data in a pandas DataFrame:
         data_df = pd.DataFrame()
@@ -71,8 +69,7 @@ class YahooDownloader:
         Select only rows with equal counts that have a stock value greater than the mean value.
 
         Args:
-            self: write your description
-            df: write your description
+            df: stock dataframe
         """
         df_check = df.tic.value_counts()
         df_check = pd.DataFrame(df_check).reset_index()

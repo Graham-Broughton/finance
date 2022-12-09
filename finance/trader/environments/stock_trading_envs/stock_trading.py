@@ -46,29 +46,27 @@ class StockTradingEnv(gym.Env):
         Initializes the results object
 
         Args:
-            df: write your description
-            pd: write your description
-            DataFrame: write your description
-            stock_dim: write your description
-            hmax: write your description
-            initial_amount: write your description
-            num_stock_shares: write your description
-            buy_cost_pct: write your description
-            sell_cost_pct: write your description
-            reward_scaling: write your description
-            state_space: write your description
-            action_space: write your description
-            tech_indicator_list: write your description
-            turbulence_threshold: write your description
-            risk_indicator_col: write your description
-            make_plots: write your description
-            print_verbosity: write your description
-            day: write your description
-            initial: write your description
-            previous_state: write your description
-            model_name: write your description
-            mode: write your description
-            iteration: write your description
+            df: stock dataframe
+            stock_dim: dimensions of stock df
+            hmax: max number of stocks to buy or sell each step
+            initial_amount: starting $ amount
+            num_stock_shares: number of stocks shares to start with
+            buy_cost_pct: the costs of buying each stock
+            sell_cost_pct: the cost of selling each stock
+            reward_scaling: amount to scale the rewards by
+            state_space: dimensions of states
+            action_space: dimensions of actions
+            tech_indicator_list: list of technical indicators
+            turbulence_threshold: the threshold of turbulence to liquidate
+            risk_indicator_col: the column which indicates risk
+            make_plots: create plots when finished [y/n]
+            print_verbosity: output verbose [1-10]
+            day: day of week as integer
+            initial: is this the initial state
+            previous_state: information on the previous state
+            model_name: name of the model
+            mode: type of modelling
+            iteration: the number of iterations completed
         """
         self.day = day
         self.df = df
@@ -129,7 +127,7 @@ class StockTradingEnv(gym.Env):
         Perform stock sell actions on the specified index.
 
         Args:
-            index: index ofo stock
+            index: index of stock
             action: magnitude of sell action
         """
         def _do_sell_normal():
@@ -445,8 +443,8 @@ class StockTradingEnv(gym.Env):
         Render the state of the widget.
 
         Args:
-            mode: write your description
-            close: write your description
+            mode: type of modelling
+            close: closing price
         """
         return self.state
 

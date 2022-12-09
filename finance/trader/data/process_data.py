@@ -8,9 +8,6 @@ class ProcessData:
     def __init__(self, **kwargs):
         """
         Initializes the downloader.
-
-        Args:
-            self: write your description
         """
         self.stock_processor = YahooDownloader()
 
@@ -19,11 +16,10 @@ class ProcessData:
         Download data from the stock processor.
 
         Args:
-            self: write your description
-            ticker_list: write your description
-            start_date: write your description
-            end_date: write your description
-            interval: write your description
+            ticker_list: list of stock tickers
+            start_date: starting date
+            end_date: ending date
+            interval: interval to trade on
         """
         df = self.stock_processor.download(
             start_date, end_date, ticker_list, interval
@@ -35,8 +31,7 @@ class ProcessData:
         Clean dataframe.
 
         Args:
-            self: write your description
-            df: write your description
+            df: stock dataframe
         """
         return self.stock_processor.clean_data(df)
 
@@ -45,9 +40,8 @@ class ProcessData:
         Add indicators to dataframe.
 
         Args:
-            self: write your description
-            df: write your description
-            indicators: write your description
+            df: stock dataframe
+            indicators: list of technical indicators
         """
         self.indicator_list = indicators
         return self.stock_processor.add_indicators(df, indicators)

@@ -83,22 +83,22 @@ class StockTradingEnvCashpenalty(gym.Env):
         DataFrame to hold data for the stock and commodity markets.
 
         Args:
-            df: write your description
-            buy_cost_pct: write your description
-            sell_cost_pct: write your description
-            date_col_name: write your description
-            hmax: write your description
-            discrete_actions: write your description
-            shares_increment: write your description
-            turbulence_threshold: write your description
-            print_verbosity: write your description
-            initial_amount: write your description
-            daily_information_cols: write your description
-            cache_indicator_data: write your description
-            cash_penalty_proportion: write your description
-            random_start: write your description
-            patient: write your description
-            currency: write your description
+            df: stock dataframe
+            buy_cost_pct: the cost of buyingeach stock
+            sell_cost_pct: cost of selling each stock
+            date_col_name: the name of the date column
+            hmax: max number of stocks to buy or sell each step
+            discrete_actions: are the actions discrete? [T/F]
+            shares_increment: number to increase shares by
+            turbulence_threshold: the threshold of turbulence to liquidate
+            print_verbosity: output verbose [1-10]
+            initial_amount: amount of $ to start with
+            daily_information_cols: list of stock price columns
+            cache_indicator_data: cache indicator data [T/F]
+            cash_penalty_proportion: cash penalty as a fraction
+            random_start: [T/F]
+            patient: [T/F]
+            currency: which currency to use
         """
         self.df = df
         self.stock_col = 'tic'
