@@ -9,6 +9,11 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 
 def driversetup():
+    """
+    Setup webdriver.
+
+    Args:
+    """
     options = webdriver.ChromeOptions()
     #run Selenium in headless mode
     options.add_argument('--headless')
@@ -31,6 +36,13 @@ def driversetup():
     return driver
 
 def pagesource(url, driver):
+    """
+    Get the page source of a web page.
+
+    Args:
+        url: write your description
+        driver: write your description
+    """
     driver = driver
     driver.get(url)
     soup = BeautifulSoup(driver.page_source)
@@ -38,6 +50,12 @@ def pagesource(url, driver):
     return soup
 
 def update(path):
+    """
+    Update data in a dataframe
+
+    Args:
+        path: write your description
+    """
     new_df = pd.read_csv(path+'csvs/pcr.csv', parse_dates=['date'])
     start_date = new_df.tail(1)['date'].tolist()[0].date() + datetime.timedelta(days=1)
     end_date = datetime.date.today() - datetime.timedelta(days=1)

@@ -7,11 +7,27 @@ from stockstats import StockDataFrame as Sdf
 
 class YahooDownloader:
     def __init__(self):
+        """
+        Initialize the class with the default values.
+
+        Args:
+            self: write your description
+        """
         pass
 
     def download(
         self, start_date: str, end_date: str, ticker_list: list, interval: str
     ):
+        """
+        Download ticker data from Yahoo Finance.
+
+        Args:
+            self: write your description
+            start_date: write your description
+            end_date: write your description
+            ticker_list: write your description
+            interval: write your description
+        """
         self.start = start_date
         self.end = end_date
         self.interval = interval
@@ -47,6 +63,14 @@ class YahooDownloader:
         return data
 
     def get_trading_days(self, start_date: str, end_date: str):
+        """
+        Get a list of trading days between the given dates.
+
+        Args:
+            self: write your description
+            start_date: write your description
+            end_date: write your description
+        """
         nyse = tc.get_calendar('NYSE')
         df = nyse.sessions_in_range(
             pd.Timestamp(start_date),
@@ -56,6 +80,15 @@ class YahooDownloader:
         return trading_days
 
     def clean_data(self, data: pd.DataFrame):
+        """
+        Clean dataframe for trading.
+
+        Args:
+            self: write your description
+            data: write your description
+            pd: write your description
+            DataFrame: write your description
+        """
         df = data.copy()
         df = df.rename({'date': 'time'}, axis=1)
         time_interval = self.interval
