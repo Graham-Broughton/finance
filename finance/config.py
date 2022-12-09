@@ -24,11 +24,9 @@ INDICATORS = [
     'dx_30',
     'close_30_sma',
     'close_60_sma',
-    'vr_30',
     'wr_30',
     'atr_30',
     'supertrend',
-    'vwma_30',
     'mfi_30',
     'close_30_tema',
 ]

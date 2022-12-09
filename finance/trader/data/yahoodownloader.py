@@ -87,13 +87,13 @@ class YahooDownloader:
             print(('Clean data for ') + tic)
             # Create empty df using the times as index
             tmp_df = pd.DataFrame(
-                columns=['open', 'high', 'low', 'close', 'adjclose', 'volume'],
+                columns=['open', 'high', 'low', 'close', 'adjcp', 'volume'],
                 index=times,
             )
             tic_df = df[df['tic'] == tic]
             for i in range(tic_df.shape[0]):
                 tmp_df.loc[tic_df.iloc[i]['time']] = tic_df.iloc[i][
-                    ['open', 'high', 'low', 'close', 'adjclose', 'volume']
+                    ['open', 'high', 'low', 'close', 'adjcp', 'volume']
                 ]
 
             if str(tmp_df.iloc[0]['close']) == 'nan':
@@ -102,7 +102,6 @@ class YahooDownloader:
                     if str(tmp_df.iloc[i]['close']) != 'nan':
                         first_valid_close = tmp_df.iloc[i]['close']
                         first_valid_adjclose = tmp_df.iloc[i]['adjcp']
-                    break
 
                 tmp_df.iloc[0] = [
                     first_valid_close,
@@ -157,6 +156,7 @@ class YahooDownloader:
         unique_ticker = stock.tic.unique()
 
         for indicator in indicator_list:
+            print(f'Adding indicator: {indicator}')
             indicator_df = pd.DataFrame()
             for i in range(len(unique_ticker)):
                 try:
@@ -175,6 +175,7 @@ class YahooDownloader:
                 indicator_df[['tic', 'time', indicator]], on=['tic', 'time'], how='left'
             )
         df = df.sort_values(by=['time', 'tic'])
+        print('Finished adding indicators')
         return df
 
     def add_turbulence(self, data):
