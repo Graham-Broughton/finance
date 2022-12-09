@@ -71,8 +71,7 @@ class YahooDownloader:
             pd.Timestamp(start_date),
             pd.Timestamp(end_date),
         )
-        trading_days = df.strftime('%Y-%m-%d').to_list()
-        return trading_days
+        return df.strftime('%Y-%m-%d').to_list()
 
     def clean_data(self, data: pd.DataFrame):
         """
@@ -91,8 +90,6 @@ class YahooDownloader:
         if time_interval == '1D':
             times = trading_days
         elif time_interval == '1m':
-            # Define and add NY's offset from UST and fill it in with minutes
-            NY = 'America/New_York'
             delta = np.timedelta64(9, 'h') + np.timedelta64(30, 'm')
             newdt = np.array(trading_days, dtype='datetime64') + delta
             dt = np.array(
@@ -101,7 +98,7 @@ class YahooDownloader:
                     for day in newdt
                 ]
             )
-            df = pd.to_datetime(dt).reshape(-1, 1).tz_localize(NY)
+            df = pd.to_datetime(dt).reshape(-1, 1).tz_localize('America/New_York')
             times = df.to_list()
         else:
             raise ValueError('The given Interval is not supported')
@@ -241,7 +238,7 @@ class YahooDownloader:
             ].dropna(axis=1)
 
             cov_temp = filtered_hist_price.cov()
-            current_temp = current_price[[x for x in filtered_hist_price]] - np.mean(
+            current_temp = current_price[list(filtered_hist_price)] - np.mean(
                 filtered_hist_price, axis=0
             )
             temp = current_temp.values.dot(np.linalg.pinv(cov_temp)).dot(
@@ -249,11 +246,7 @@ class YahooDownloader:
             )
             if temp > 0:
                 count += 1
-                if count > 2:
-                    turbulence_temp = temp[0][0]
-                else:
-                    # avoid large outlier because of the calculation just begins
-                    turbulence_temp = 0
+                turbulence_temp = temp[0][0] if count > 2 else 0
             else:
                 turbulence_temp = 0
             turbulence_index.append(turbulence_temp)
