@@ -51,67 +51,66 @@ class AlpacaPaperTrading:
         """
         # load agent
         self.drl_lib = drl_lib
-        if agent == 'ppo':
-            if drl_lib == 'elegantrl':
-                from elegantrl.agents import AgentPPO
-                from elegantrl.train.run import init_agent
-                from elegantrl.train.config import (
-                    Arguments,
-                )  # bug fix:ModuleNotFoundError: No module named 'elegantrl.run'
+        if agent != 'ppo':
+            raise ValueError('Agent input is NOT supported yet.')
 
-                # load agent
-                config = {
-                    'state_dim': state_dim,
-                    'action_dim': action_dim,
-                }
-                args = Arguments(agent_class=AgentPPO, env=StockEnvEmpty(config))
-                args.cwd = cwd
-                args.net_dim = net_dim
-                # load agent
-                try:
-                    agent = init_agent(args, gpu_id=0)
-                    self.act = agent.act
-                    self.device = agent.device
-                except BaseException:
-                    raise ValueError('Fail to load agent!')
+        if drl_lib == 'elegantrl':
+            from elegantrl.agents import AgentPPO
+            from elegantrl.train.run import init_agent
+            from elegantrl.train.config import (
+                Arguments,
+            )  # bug fix:ModuleNotFoundError: No module named 'elegantrl.run'
 
-            elif drl_lib == 'rllib':
-                from ray.rllib.agents import ppo
-                from ray.rllib.agents.ppo.ppo import PPOTrainer
+            # load agent
+            config = {
+                'state_dim': state_dim,
+                'action_dim': action_dim,
+            }
+            args = Arguments(agent_class=AgentPPO, env=StockEnvEmpty(config))
+            args.cwd = cwd
+            args.net_dim = net_dim
+            # load agent
+            try:
+                agent = init_agent(args, gpu_id=0)
+                self.act = agent.act
+                self.device = agent.device
+            except BaseException:
+                raise ValueError('Fail to load agent!')
 
-                config = ppo.DEFAULT_CONFIG.copy()
-                config['env'] = StockEnvEmpty
-                config['log_level'] = 'WARN'
-                config['env_config'] = {
-                    'state_dim': state_dim,
-                    'action_dim': action_dim,
-                }
-                trainer = PPOTrainer(env=StockEnvEmpty, config=config)
+        elif drl_lib == 'rllib':
+            from ray.rllib.agents import ppo
+            from ray.rllib.agents.ppo.ppo import PPOTrainer
+
+            config = ppo.DEFAULT_CONFIG.copy()
+            config['env'] = StockEnvEmpty
+            config['log_level'] = 'WARN'
+            config['env_config'] = {
+                'state_dim': state_dim,
+                'action_dim': action_dim,
+            }
+            trainer = PPOTrainer(env=StockEnvEmpty, config=config)
+            trainer.restore(cwd)
+            try:
                 trainer.restore(cwd)
-                try:
-                    trainer.restore(cwd)
-                    self.agent = trainer
-                    print('Restoring from checkpoint path', cwd)
-                except:
-                    raise ValueError('Fail to load agent!')
+                self.agent = trainer
+                print('Restoring from checkpoint path', cwd)
+            except:
+                raise ValueError('Fail to load agent!')
 
-            elif drl_lib == 'stable_baselines3':
-                from stable_baselines3 import PPO
+        elif drl_lib == 'stable_baselines3':
+            from stable_baselines3 import PPO
 
-                try:
-                    # load agent
-                    self.model = PPO.load(cwd)
-                    print('Successfully load model', cwd)
-                except:
-                    raise ValueError('Fail to load agent!')
-
-            else:
-                raise ValueError(
-                    'The DRL library input is NOT supported yet. Please check your input.'
-                )
+            try:
+                # load agent
+                self.model = PPO.load(cwd)
+                print('Successfully load model', cwd)
+            except:
+                raise ValueError('Fail to load agent!')
 
         else:
-            raise ValueError('Agent input is NOT supported yet.')
+            raise ValueError(
+                'The DRL library input is NOT supported yet. Please check your input.'
+            )
 
         # connect to Alpaca trading API
         try:
@@ -166,7 +165,7 @@ class AlpacaPaperTrading:
             test_times: number of times to test
         """
         total_time = 0
-        for i in range(0, test_times):
+        for _ in range(test_times):
             time0 = time.time()
             self.get_state()
             time1 = time.time()
@@ -205,26 +204,6 @@ class AlpacaPaperTrading:
                 print('Market closing soon. Stop trading.')
                 break
 
-                """# Close all positions when 1 minutes til market close.
-            print("Market closing soon.  Closing positions.")
-
-            positions = self.alpaca.list_positions()
-            for position in positions:
-              if(position.side == 'long'):
-                orderSide = 'sell'
-              else:
-                orderSide = 'buy'
-              qty = abs(int(float(position.qty)))
-              respSO = []
-              tSubmitOrder = threading.Thread(
-                  target=self.submitOrder(qty, position.symbol, orderSide, respSO))
-              tSubmitOrder.start()
-              tSubmitOrder.join()
-
-            # Run script again after market close for next trading day.
-            print("Sleeping until market close (15 minutes).")
-            time.sleep(60 * 15)"""
-
             else:
                 trade = threading.Thread(target=self.trade)
                 trade.start()
@@ -246,7 +225,7 @@ class AlpacaPaperTrading:
             ).timestamp()
             currTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
             timeToOpen = int((openingTime - currTime) / 60)
-            print(str(timeToOpen) + ' minutes til market open.')
+            print(f'{timeToOpen} minutes til market open.')
             time.sleep(60)
             isOpen = self.alpaca.get_clock().is_open
 
@@ -293,10 +272,7 @@ class AlpacaPaperTrading:
                 self.stocks_cd[index] = 0
 
             for index in np.where(action > min_action)[0]:  # buy_index:
-                if self.cash < 0:
-                    tmp_cash = 0
-                else:
-                    tmp_cash = self.cash
+                tmp_cash = max(self.cash, 0)
                 buy_num_shares = min(
                     tmp_cash // self.price[index], abs(int(action[index]))
                 )
@@ -315,10 +291,7 @@ class AlpacaPaperTrading:
         else:  # sell all when turbulence
             positions = self.alpaca.list_positions()
             for position in positions:
-                if position.side == 'long':
-                    orderSide = 'sell'
-                else:
-                    orderSide = 'buy'
+                orderSide = 'sell' if position.side == 'long' else 'buy'
                 qty = abs(int(float(position.qty)))
                 respSO = []
                 tSubmitOrder = threading.Thread(
@@ -388,13 +361,15 @@ class AlpacaPaperTrading:
         if qty > 0:
             try:
                 self.alpaca.submit_order(stock, qty, side, 'market', 'day')
-                print(
-                    'Market order of | ' + str(qty) + ' ' + stock + ' ' + side + ' | completed.'
-                )
+                print(f'Market order of | {str(qty)} ' + stock + ' ' + side + ' | completed.')
                 resp.append(True)
             except:
                 print(
-                    'Order of | ' + str(qty) + ' ' + stock + ' ' + side + ' | did not go through.'
+                    f'Order of | {str(qty)} '
+                    + stock
+                    + ' '
+                    + side
+                    + ' | did not go through.'
                 )
                 resp.append(False)
         else:

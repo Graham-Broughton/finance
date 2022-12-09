@@ -21,10 +21,9 @@ class ProcessData:
             end_date: ending date
             interval: interval to trade on
         """
-        df = self.stock_processor.download(
+        return self.stock_processor.download(
             start_date, end_date, ticker_list, interval
         )
-        return df
 
     def clean_data(self, df):
         """

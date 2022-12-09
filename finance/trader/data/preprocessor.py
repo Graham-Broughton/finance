@@ -14,9 +14,7 @@ def load_dataset(*, file_name: str):
     load csv dataset from path
     :return: (df) pandas dataframe
     """
-    # _data = pd.read_csv(f"{config.DATASET_DIR}/{file_name}")
-    _data = pd.read_csv(file_name)
-    return _data
+    return pd.read_csv(file_name)
 
 
 def data_split(df, start, end, target_date_col='date'):
@@ -38,8 +36,8 @@ def convert_to_datetime(time):
     Args:
         time: time repreesnted in string
     """
-    time_fmt = '%Y-%m-%dT%H:%M:%S'
     if isinstance(time, str):
+        time_fmt = '%Y-%m-%dT%H:%M:%S'
         return datetime.datetime.strptime(time, time_fmt)
 
 
@@ -237,7 +235,7 @@ class FeatureEngineer:
             ].dropna(axis=1)
 
             cov_temp = filtered_hist_price.cov()
-            current_temp = current_price[[x for x in filtered_hist_price]] - np.mean(
+            current_temp = current_price[list(filtered_hist_price)] - np.mean(
                 filtered_hist_price, axis=0
             )
 
@@ -246,11 +244,7 @@ class FeatureEngineer:
             )
             if temp > 0:
                 count += 1
-                if count > 2:
-                    turbulence_temp = temp[0][0]
-                else:
-                    # avoid large outlier because of the calculation just begins
-                    turbulence_temp = 0
+                turbulence_temp = temp[0][0] if count > 2 else 0
             else:
                 turbulence_temp = 0
             turbulence_index.append(turbulence_temp)

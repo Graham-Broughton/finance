@@ -368,7 +368,10 @@ class StockTradingEnvCashpenalty(gym.Env):
         actions = np.maximum(actions, -np.array(self.holdings))
 
         # deal with turbulence
-        if self.turbulence_threshold is not None and self.turbulence >= self.turbulence_threshold:
+        if (
+            self.turbulence_threshold is not None
+            and self.turbulence >= self.turbulence_threshold
+        ):
             actions = -(np.array(self.holdings))
             self.log_step(reason='TURBULENCE')
 
@@ -381,7 +384,6 @@ class StockTradingEnvCashpenalty(gym.Env):
         # print if it's time.
         if (self.current_step + 1) % self.print_verbosity == 0:
             self.log_step(reason='update')
-        # if we're at the end
         if self.date_index == len(self.dates) - 1:
             # if we hit the end, set reward to total gains (or losses)
             return self.return_terminal(reward=self.get_reward())

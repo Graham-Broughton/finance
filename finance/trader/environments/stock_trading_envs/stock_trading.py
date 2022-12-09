@@ -247,8 +247,6 @@ class StockTradingEnv(gym.Env):
                 buy_num_shares = _do_buy()
             else:
                 buy_num_shares = 0
-                pass
-
         return buy_num_shares
 
     def _make_plot(self):
@@ -310,27 +308,19 @@ class StockTradingEnv(gym.Env):
             if (self.model_name != '') and (self.mode != ''):
                 df_actions = self.save_action_memory()
                 df_actions.to_csv(
-                    'results/actions_{}_{}_{}.csv'.format(
-                        self.mode, self.model_name, self.iteration
-                    )
+                    f'results/actions_{self.mode}_{self.model_name}_{self.iteration}.csv'
                 )
                 df_total_value.to_csv(
-                    'results/account_value_{}_{}_{}.csv'.format(
-                        self.mode, self.model_name, self.iteration
-                    ),
+                    f'results/account_value_{self.mode}_{self.model_name}_{self.iteration}.csv',
                     index=False,
                 )
                 df_rewards.to_csv(
-                    'results/account_rewards_{}_{}_{}.csv'.format(
-                        self.mode, self.model_name, self.iteration
-                    ),
+                    f'results/account_rewards_{self.mode}_{self.model_name}_{self.iteration}.csv',
                     index=False,
                 )
                 plt.plot(self.asset_memory, 'r')
                 plt.savefig(
-                    'results/account_value_{}_{}_{}.png'.format(
-                        self.mode, self.model_name, self.iteration
-                    ),
+                    f'results/account_value_{self.mode}_{self.model_name}_{self.iteration}.png',
                     index=False,
                 )
                 plt.close()
@@ -350,9 +340,11 @@ class StockTradingEnv(gym.Env):
             actions = actions.astype(
                 int
             )  # convert into integer because we can't by fraction of shares
-            if self.turbulence_threshold is not None:
-                if self.turbulence >= self.turbulence_threshold:
-                    actions = np.array([-self.hmax] * self.stock_dim)
+            if (
+                self.turbulence_threshold is not None
+                and self.turbulence >= self.turbulence_threshold
+            ):
+                actions = np.array([-self.hmax] * self.stock_dim)
             begin_total_asset = self.state[0] + sum(
                 np.array(self.state[1: (self.stock_dim + 1)]) * np.array(
                     self.state[(self.stock_dim + 1): (self.stock_dim * 2 + 1)])
@@ -454,46 +446,56 @@ class StockTradingEnv(gym.Env):
         """
         if self.initial:
             # For Initial State
-            if len(self.df.tic.unique()) > 1:
-                # for multiple stock
-                state = (
-                    [self.initial_amount] + self.data.close.values.tolist() + self
-                    .num_stock_shares + sum(
+            return (
+                (
+                    [self.initial_amount]
+                    + self.data.close.values.tolist()
+                    + self.num_stock_shares
+                    + sum(
                         (
                             self.data[tech].values.tolist()
                             for tech in self.tech_indicator_list
                         ),
                         [],
                     )
-                )  # append initial stocks_share to initial state, instead of all zero
-            else:
-                # for single stock
-                state = (
-                    [self.initial_amount] + [self.data.close] + [0] * self.stock_dim + sum((
-                        [self.data[tech]] for tech in self.tech_indicator_list), [])
                 )
+                if len(self.df.tic.unique()) > 1
+                else (
+                    [self.initial_amount]
+                    + [self.data.close]
+                    + [0] * self.stock_dim
+                    + sum(
+                        ([self.data[tech]] for tech in self.tech_indicator_list),
+                        [],
+                    )
+                )
+            )
+        elif len(self.df.tic.unique()) > 1:
+                # for multiple stock
+            return (
+                [self.previous_state[0]]
+                + self.data.close.values.tolist()
+                + self.previous_state[
+                    (self.stock_dim + 1) : (self.stock_dim * 2 + 1)
+                ]
+                + sum(
+                    (
+                        self.data[tech].values.tolist()
+                        for tech in self.tech_indicator_list
+                    ),
+                    [],
+                )
+            )
         else:
-            # Using Previous State
-            if len(self.df.tic.unique()) > 1:
-                # for multiple stock
-                state = (
-                    [self.previous_state[0]] + self.data.close.values.tolist() + self
-                    .previous_state[(self.stock_dim + 1): (self.stock_dim * 2 + 1)] + sum(
-                        (
-                            self.data[tech].values.tolist()
-                            for tech in self.tech_indicator_list
-                        ),
-                        [],
-                    )
-                )
-            else:
                 # for single stock
-                state = (
-                    [self.previous_state[0]] + [self.data.close] + self.previous_state[
-                        (self.stock_dim + 1): (self.stock_dim * 2 + 1)
-                    ] + sum(([self.data[tech]] for tech in self.tech_indicator_list), [])
-                )
-        return state
+            return (
+                [self.previous_state[0]]
+                + [self.data.close]
+                + self.previous_state[
+                    (self.stock_dim + 1) : (self.stock_dim * 2 + 1)
+                ]
+                + sum(([self.data[tech]] for tech in self.tech_indicator_list), [])
+            )
 
     def _update_state(self):
         """
@@ -537,9 +539,9 @@ class StockTradingEnv(gym.Env):
         """
         Saves state memory in a readable format.
         """
+        # date and close price length must match actions length
+        date_list = self.date_memory[:-1]
         if len(self.df.tic.unique()) > 1:
-            # date and close price length must match actions length
-            date_list = self.date_memory[:-1]
             df_date = pd.DataFrame(date_list)
             df_date.columns = ['date']
 
@@ -557,9 +559,8 @@ class StockTradingEnv(gym.Env):
                 ],
             )
             df_states.index = df_date.date
-            # df_actions = pd.DataFrame({'date':date_list,'actions':action_list})
+                # df_actions = pd.DataFrame({'date':date_list,'actions':action_list})
         else:
-            date_list = self.date_memory[:-1]
             state_list = self.state_memory
             df_states = pd.DataFrame({'date': date_list, 'states': state_list})
         # print(df_states)
@@ -571,20 +572,15 @@ class StockTradingEnv(gym.Env):
         """
         date_list = self.date_memory
         asset_list = self.asset_memory
-        # print(len(date_list))
-        # print(len(asset_list))
-        df_account_value = pd.DataFrame(
-            {'date': date_list, 'account_value': asset_list}
-        )
-        return df_account_value
+        return pd.DataFrame({'date': date_list, 'account_value': asset_list})
 
     def save_action_memory(self):
         """
         Save actions in memory.
         """
+        # date and close price length must match actions length
+        date_list = self.date_memory[:-1]
         if len(self.df.tic.unique()) > 1:
-            # date and close price length must match actions length
-            date_list = self.date_memory[:-1]
             df_date = pd.DataFrame(date_list)
             df_date.columns = ['date']
 
@@ -592,9 +588,8 @@ class StockTradingEnv(gym.Env):
             df_actions = pd.DataFrame(action_list)
             df_actions.columns = self.data.tic.values
             df_actions.index = df_date.date
-            # df_actions = pd.DataFrame({'date':date_list,'actions':action_list})
+                # df_actions = pd.DataFrame({'date':date_list,'actions':action_list})
         else:
-            date_list = self.date_memory[:-1]
             action_list = self.actions_memory
             df_actions = pd.DataFrame({'date': date_list, 'actions': action_list})
         return df_actions
