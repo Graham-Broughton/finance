@@ -1,0 +1,8 @@
+wandb_version: 1
+
+ent_coef:
+  value: 1.61854092345469
+learning_rate:
+  value: 1.3047112728245451
+n_steps:
+  value: 1024
