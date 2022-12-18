@@ -24,26 +24,25 @@ class YahooDownloader:
             proxy: proxy to download from
         """
         # Download and save the data in a pandas DataFrame:
-        data_df = pd.DataFrame()
-        for tic in self.ticker_list:
-            temp_df = yf.download(
-                tic, start=self.start_date, end=self.end_date, proxy=proxy
-            )
-            temp_df['tic'] = tic
-            data_df = data_df.append(temp_df)
-        # reset the index, we want to use numbers as index instead of dates
-        data_df = data_df.reset_index()
+        data = yf.download(
+            self.ticker_list, start=self.start_date, end=self.end_date, proxy=proxy
+        )
+        data = data.unstack().reset_index().melt(
+            id_vars=['Date', 'level_0', 'level_1'], value_vars=0)
+        data_df = data.pivot_table(
+            values='value', index=['Date', 'level_1'], columns='level_0'
+        ).reset_index().rename({'level_1': 'tic'}, axis=1)
         try:
             # convert the column names to standardized names
             data_df.columns = [
                 'date',
-                'open',
+                'tic',
+                'adjcp',
+                'close',
                 'high',
                 'low',
-                'close',
-                'adjcp',
+                'open',
                 'volume',
-                'tic',
             ]
             # use adjusted close price instead of close price
             data_df['close'] = data_df['adjcp']
@@ -60,7 +59,6 @@ class YahooDownloader:
         data_df = data_df.reset_index(drop=True)
         print('Shape of DataFrame: ', data_df.shape)
         # print("Display DataFrame: ", data_df.head())
-
         data_df = data_df.sort_values(by=['date', 'tic']).reset_index(drop=True)
         return data_df
 
