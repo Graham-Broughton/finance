@@ -26,6 +26,21 @@ def train(
     if_vix=True,
     **kwargs,
 ):
+    """
+    Train an ERL model.
+
+    Args:
+        start_date: write your description
+        end_date: write your description
+        ticker_list: write your description
+        data_source: write your description
+        time_interval: write your description
+        technical_indicator_list: write your description
+        drl_lib: write your description
+        env: write your description
+        model_name: write your description
+        if_vix: write your description
+    """
     # download data
     dp = DataProcessor(data_source, **kwargs)
     data = dp.download_data(ticker_list, start_date, end_date, time_interval)
