@@ -1,5 +1,35 @@
-# Reinforcement Learning Trading Bot
+This folder has three subfolders:
++ applications: trading tasks,
++ agents: DRL algorithms, from ElegantRL, RLlib, or Stable Baselines 3 (SB3). Users can plug in any DRL lib and play.
++ meta: market environments, we merge the stable ones from the active [FinRL-Meta repo](https://github.com/AI4Finance-Foundation/FinRL-Meta).
 
-This project is still in its infancy so many of these ideas are either non-existent or lacking in implementation. The idea for this project is to have a fully automated trading bot that not only uses stock OHLCV data for its predictions, but implements the sentiment towards the stocks as well by using an NLP model and webscraping. It will also automatically detect when there is a market regime shift and change its trading strategy accordingly. Scraping the prices each training routine would be very cost prohibitive so it will store the various pieces of information in a database - SQL style for the price data and NoSQL for the web scraped news. To further reduce overhead it will be optimized as much as possible: vectorizing operations when possible, using asynchronous processing via threading, multiprocessing and/or asyncio, and time permitting a complete overhaul using more effecient libraries like polars instead of pandas.
+Then, we employ a train-test-trade pipeline by three files: train.py, test.py, and trade.py.
 
-The model itself will be implemented using the gym library and stable-baselines3 for state-of-the-art RL models.
+```
+FinRL
+├── finrl (this folder)
+│   ├── applications
+│   	├── cryptocurrency_trading
+│   	├── high_frequency_trading
+│   	├── portfolio_allocation
+│   	└── stock_trading
+│   ├── agents
+│   	├── elegantrl
+│   	├── rllib
+│   	└── stablebaseline3
+│   ├── meta
+│   	├── data_processors
+│   	├── env_cryptocurrency_trading
+│   	├── env_portfolio_allocation
+│   	├── env_stock_trading
+│   	├── preprocessor
+│   	├── data_processor.py
+│   	└── finrl_meta_config.py
+│   ├── config.py
+│   ├── config_tickers.py
+│   ├── main.py
+│   ├── train.py
+│   ├── test.py
+│   ├── trade.py
+│   └── plot.py
+```

@@ -1,0 +1,2 @@
+- name: Sourcery Action
+  uses: sourcery-ai/action@v1
