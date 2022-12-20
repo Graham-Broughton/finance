@@ -78,6 +78,24 @@ class StockPortfolioEnv(gym.Env):
         lookback=252,
         day=0,
     ):
+        """
+        Initialize StockEnv object from a pandas dataframe.
+
+        Args:
+            self: write your description
+            df: write your description
+            stock_dim: write your description
+            hmax: write your description
+            initial_amount: write your description
+            transaction_cost_pct: write your description
+            reward_scaling: write your description
+            state_space: write your description
+            action_space: write your description
+            tech_indicator_list: write your description
+            turbulence_threshold: write your description
+            lookback: write your description
+            day: write your description
+        """
         # super(StockEnv, self).__init__()
         # money = 10 , scope = 1
         self.day = day
@@ -123,6 +141,13 @@ class StockPortfolioEnv(gym.Env):
         self.date_memory = [self.data.date.unique()[0]]
 
     def step(self, actions):
+        """
+        Step forward model with given actions.
+
+        Args:
+            self: write your description
+            actions: write your description
+        """
         # print(self.day)
         self.terminal = self.day >= len(self.df.index.unique()) - 1
         # print(actions)
@@ -200,6 +225,12 @@ class StockPortfolioEnv(gym.Env):
         return self.state, self.reward, self.terminal, {}
 
     def reset(self):
+        """
+        Reset the dataframe and return the dataframe
+
+        Args:
+            self: write your description
+        """
         self.asset_memory = [self.initial_amount]
         self.day = 0
         self.data = self.df.loc[self.day, :]
@@ -220,15 +251,35 @@ class StockPortfolioEnv(gym.Env):
         return self.state
 
     def render(self, mode="human"):
+        """
+        Render the state to a string.
+
+        Args:
+            self: write your description
+            mode: write your description
+        """
         return self.state
 
     def softmax_normalization(self, actions):
+        """
+        Applies softmax normalization to the given actions.
+
+        Args:
+            self: write your description
+            actions: write your description
+        """
         numerator = np.exp(actions)
         denominator = np.sum(np.exp(actions))
         softmax_output = numerator / denominator
         return softmax_output
 
     def save_asset_memory(self):
+        """
+        Returns a dataframe of the asset memory
+
+        Args:
+            self: write your description
+        """
         date_list = self.date_memory
         portfolio_return = self.portfolio_return_memory
         # print(len(date_list))
@@ -239,6 +290,12 @@ class StockPortfolioEnv(gym.Env):
         return df_account_value
 
     def save_action_memory(self):
+        """
+        Returns a dataframe of actions that are stored in the actions_memory variable.
+
+        Args:
+            self: write your description
+        """
         # date and close price length must match actions length
         date_list = self.date_memory
         df_date = pd.DataFrame(date_list)
@@ -252,10 +309,23 @@ class StockPortfolioEnv(gym.Env):
         return df_actions
 
     def _seed(self, seed=None):
+        """
+        Seed the generator with the given seed.
+
+        Args:
+            self: write your description
+            seed: write your description
+        """
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
     def get_sb_env(self):
+        """
+        Get a vector environment and a vector obs of the problem.
+
+        Args:
+            self: write your description
+        """
         e = DummyVecEnv([lambda: self])
         obs = e.reset()
         return e, obs

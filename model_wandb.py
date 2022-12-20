@@ -29,6 +29,14 @@ NOISE = {
 
 class DRLAgent_SB3:
   def __init__(self,env,run):
+      """
+      Initialize the run.
+
+      Args:
+          self: write your description
+          env: write your description
+          run: write your description
+      """
     self.env = env
     # self.run = wandb.init(reinit=True,
     #       project = 'finrl-sweeps-sb3',
@@ -44,6 +52,17 @@ class DRLAgent_SB3:
       verbose=1,
       seed=None,
   ):
+      """
+      Get a TensorBoardModel instance for the given model_name.
+
+      Args:
+          self: write your description
+          model_name: write your description
+          policy_kwargs: write your description
+          model_kwargs: write your description
+          verbose: write your description
+          seed: write your description
+      """
       if model_name not in MODELS:
           raise NotImplementedError("NotImplementedError")
 
@@ -69,6 +88,14 @@ class DRLAgent_SB3:
       return model
 
   def train_model(self, model,total_timesteps):
+      """
+      Train a model.
+
+      Args:
+          self: write your description
+          model: write your description
+          total_timesteps: write your description
+      """
     model = model.learn(
         total_timesteps=total_timesteps,
         callback = WandbCallback(
@@ -81,6 +108,15 @@ class DRLAgent_SB3:
 
   @staticmethod
   def DRL_prediction_load_from_file(run , model_name, environment,val_or_test='val'):
+      """
+      Runs the DRL prediction and returns the sharpe.
+
+      Args:
+          run: write your description
+          model_name: write your description
+          environment: write your description
+          val_or_test: write your description
+      """
       if model_name not in MODELS:
           raise NotImplementedError("NotImplementedError, Pass correct model name")
       try:
@@ -109,6 +145,12 @@ class DRLAgent_SB3:
           episode_returns.append(episode_return)
 
       def calculate_sharpe(df):
+          """
+          Calculate sharpe of a DataFrame.
+
+          Args:
+              df: write your description
+          """
         df['daily_return'] = df['account_value'].pct_change(1)
         if df['daily_return'].std() !=0:
           sharpe = (252**0.5)*df['daily_return'].mean()/ \

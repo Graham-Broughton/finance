@@ -21,6 +21,25 @@ def trade(
     if_vix=True,
     **kwargs,
 ):
+    """
+    Trading mode is either ""test"" or ""trade_mode == ""backtest"".
+
+    Args:
+        start_date: write your description
+        end_date: write your description
+        ticker_list: write your description
+        data_source: write your description
+        time_interval: write your description
+        technical_indicator_list: write your description
+        drl_lib: write your description
+        env: write your description
+        model_name: write your description
+        API_KEY: write your description
+        API_SECRET: write your description
+        API_BASE_URL: write your description
+        trade_mode: write your description
+        if_vix: write your description
+    """
     if trade_mode == "backtesting":
         # use test function for backtesting mode
         test(
