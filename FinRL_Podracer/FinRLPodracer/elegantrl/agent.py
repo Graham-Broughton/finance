@@ -12,6 +12,12 @@ class AgentBase:
     Base Class
     """
     def __init__(self):
+        """
+        Initialize the state of the optimizer.
+
+        Args:
+            self: write your description
+        """
         self.state = None
         self.device = None
         self.action_dim = None
@@ -86,21 +92,58 @@ class AgentBase:
 
     @staticmethod
     def optim_update(optimizer, objective):
+        """
+        Update the optimizer with the given objective.
+
+        Args:
+            optimizer: write your description
+            objective: write your description
+        """
         optimizer.zero_grad()
         objective.backward()
         optimizer.step()
 
     @staticmethod
     def optim_update_amp(optimizer, objective):  # automatic mixed precision
+        """
+        Update AMP optimizer with AMP objective.
+
+        Args:
+            optimizer: write your description
+            objective: write your description
+        """
         pass
 
     @staticmethod
     def soft_update(target_net, current_net, tau):
+        """
+        Applies soft update to the net.
+
+        Args:
+            target_net: write your description
+            current_net: write your description
+            tau: write your description
+        """
         for tar, cur in zip(target_net.parameters(), current_net.parameters()):
             tar.data.copy_(cur.data * tau + tar.data * (1 - tau))
 
     def save_or_load_agent(self, cwd, if_save):
+        """
+        Save or load the state of the agent.
+
+        Args:
+            self: write your description
+            cwd: write your description
+            if_save: write your description
+        """
         def load_torch_file(model_or_optim, _path):
+            """
+            Load a torch file.
+
+            Args:
+                model_or_optim: write your description
+                _path: write your description
+            """
             state_dict = torch.load(_path, map_location=lambda storage, loc: storage)
             model_or_optim.load_state_dict(state_dict)
 
@@ -128,6 +171,12 @@ class AgentBase:
 
 class AgentPPO(AgentBase):
     def __init__(self):
+        """
+        Initialize the PPO.
+
+        Args:
+            self: write your description
+        """
         super().__init__()
         self.if_on_policy = True
 
@@ -141,19 +190,55 @@ class AgentPPO(AgentBase):
         self.Cri = CriticPPO
 
     def init(self, net_dim, state_dim, action_dim, learning_rate=1e-4, if_use_gae=False, gpu_id=0):
+        """
+        Initialize the reward sum
+
+        Args:
+            self: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            learning_rate: write your description
+            if_use_gae: write your description
+            gpu_id: write your description
+        """
         super().init(net_dim, state_dim, action_dim, learning_rate, if_use_gae, gpu_id)
         self.get_reward_sum = self.get_reward_sum_gae if if_use_gae else self.get_reward_sum_raw
 
     def select_action(self, state):
+        """
+        Selects the action for the given state.
+
+        Args:
+            self: write your description
+            state: write your description
+        """
         states = torch.as_tensor((state,), dtype=torch.float32, device=self.device)
         actions, noises = self.act.get_action(states)  # plan to be get_action_a_noise
         return actions[0].detach().cpu().numpy(), noises[0].detach().cpu().numpy()
 
     def select_actions(self, states):
+        """
+        Select actions for the given states.
+
+        Args:
+            self: write your description
+            states: write your description
+        """
         actions, noises = self.act.get_action(states)  # plan to be get_action_a_noise
         return actions, noises
 
     def explore_env(self, env, target_step, reward_scale, gamma):
+        """
+        Performs a single step of the exploration environment.
+
+        Args:
+            self: write your description
+            env: write your description
+            target_step: write your description
+            reward_scale: write your description
+            gamma: write your description
+        """
         state = self.state
         srdan_list = list()
 
@@ -182,6 +267,16 @@ class AgentPPO(AgentBase):
         return states, rewards, masks, actions, noises
 
     def explore_envs_check(self, env, target_step, reward_scale, gamma):
+        """
+        Enhance the environment with the given step size.
+
+        Args:
+            self: write your description
+            env: write your description
+            target_step: write your description
+            reward_scale: write your description
+            gamma: write your description
+        """
         print(';', 0, target_step)
 
         state = self.state
@@ -208,6 +303,13 @@ class AgentPPO(AgentBase):
         return states, rewards, masks, actions, noises
 
     def prepare_buffer(self, s_r_m_a_n_list):
+        """
+        Prepare buffer for next batch of actions
+
+        Args:
+            self: write your description
+            s_r_m_a_n_list: write your description
+        """
         with torch.no_grad():  # compute reverse reward
             state, reward, mask, action, noise = s_r_m_a_n_list
             buf_len = state.size(0)
@@ -220,6 +322,16 @@ class AgentPPO(AgentBase):
         return state, action, r_sum, logprob, advantage
 
     def update_net(self, buffer, batch_size, repeat_times, soft_update_tau):
+        """
+        Update the network with the given buffer.
+
+        Args:
+            self: write your description
+            buffer: write your description
+            batch_size: write your description
+            repeat_times: write your description
+            soft_update_tau: write your description
+        """
         with torch.no_grad():
             if isinstance(buffer[0], tuple):
                 buffer = list(map(list, zip(*buffer)))  # 2D-list transpose
@@ -257,6 +369,16 @@ class AgentPPO(AgentBase):
         return obj_critic.item(), obj_actor.item(), old_logprob.mean().item() / self.action_dim  # logging_tuple
 
     def get_reward_sum_raw(self, buf_len, buf_reward, buf_mask, buf_value) -> (torch.Tensor, torch.Tensor):
+        """
+        Calculate the buffer reward sum and the advantage.
+
+        Args:
+            self: write your description
+            buf_len: write your description
+            buf_reward: write your description
+            buf_mask: write your description
+            buf_value: write your description
+        """
         buf_r_sum = torch.empty(buf_len, dtype=torch.float32, device=self.device)  # reward sum
 
         pre_r_sum = 0
@@ -267,6 +389,16 @@ class AgentPPO(AgentBase):
         return buf_r_sum, buf_advantage
 
     def get_reward_sum_gae(self, buf_len, buf_reward, buf_mask, buf_value) -> (torch.Tensor, torch.Tensor):
+        """
+        Calculate the reward sum and advantage value of the previous step using the GPU.
+
+        Args:
+            self: write your description
+            buf_len: write your description
+            buf_reward: write your description
+            buf_mask: write your description
+            buf_value: write your description
+        """
         buf_r_sum = torch.empty(buf_len, dtype=torch.float32, device=self.device)  # old policy value
         buf_advantage = torch.empty(buf_len, dtype=torch.float32, device=self.device)  # advantage value
 

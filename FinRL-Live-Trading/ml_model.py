@@ -27,6 +27,20 @@ from sklearn.svm import SVR
 
 
 def prepare_rolling_train(df,features_column,label_column,date_column,unique_datetime,testing_windows,first_trade_date_index, max_rolling_window_index,current_index):
+    """
+    Prepare training data for rolling.
+
+    Args:
+        df: write your description
+        features_column: write your description
+        label_column: write your description
+        date_column: write your description
+        unique_datetime: write your description
+        testing_windows: write your description
+        first_trade_date_index: write your description
+        max_rolling_window_index: write your description
+        current_index: write your description
+    """
     if current_index <=max_rolling_window_index:
         train=df[(df[date_column] >= unique_datetime[0]) \
                 & (df[date_column] < unique_datetime[current_index-testing_windows])]
@@ -39,6 +53,19 @@ def prepare_rolling_train(df,features_column,label_column,date_column,unique_dat
     return X_train,y_train
 
 def prepare_rolling_test(df,features_column,label_column,date_column,unique_datetime,testing_windows,fist_trade_date_index, current_index):
+    """
+    Prepare rolling test dataframe.
+
+    Args:
+        df: write your description
+        features_column: write your description
+        label_column: write your description
+        date_column: write your description
+        unique_datetime: write your description
+        testing_windows: write your description
+        fist_trade_date_index: write your description
+        current_index: write your description
+    """
     test=df[(df[date_column] >= unique_datetime[current_index-testing_windows]) \
             & (df[date_column] < unique_datetime[current_index])]
     X_test=test[features_column]
@@ -46,6 +73,20 @@ def prepare_rolling_test(df,features_column,label_column,date_column,unique_date
     return X_test,y_test
 
 def prepare_trade_data(df,features_column,label_column,date_column,tic_column,unique_datetime,testing_windows,fist_trade_date_index, current_index):
+    """
+    Prepare the trade data.
+
+    Args:
+        df: write your description
+        features_column: write your description
+        label_column: write your description
+        date_column: write your description
+        tic_column: write your description
+        unique_datetime: write your description
+        testing_windows: write your description
+        fist_trade_date_index: write your description
+        current_index: write your description
+    """
     trade  = df[df[date_column] == unique_datetime[current_index]]
     X_trade = trade[features_column]
     y_trade = trade[label_column]
@@ -54,6 +95,13 @@ def prepare_trade_data(df,features_column,label_column,date_column,tic_column,un
 
 
 def train_linear_regression(X_train,y_train):
+    """
+    Train a linear regression model.
+
+    Args:
+        X_train: write your description
+        y_train: write your description
+    """
 
     lr_regressor = LinearRegression()
     model = lr_regressor.fit(X_train, y_train)
@@ -61,6 +109,13 @@ def train_linear_regression(X_train,y_train):
     return model
 
 def train_recursive_feature_elimination(X_train,y_train):
+    """
+    Train recursive feature elimination model.
+
+    Args:
+        X_train: write your description
+        y_train: write your description
+    """
 
     lr_regressor = LinearRegression(random_state = 42)
     model = RFE(lr_regressor)
@@ -68,6 +123,13 @@ def train_recursive_feature_elimination(X_train,y_train):
     return model
 
 def train_lasso(X_train, y_train):
+    """
+    Trains a lasso regression model.
+
+    Args:
+        X_train: write your description
+        y_train: write your description
+    """
     # lasso_regressor = Lasso()
     # model = lasso_regressor.fit(X_train, y_train)
 
@@ -86,6 +148,13 @@ def train_lasso(X_train, y_train):
     return model
 
 def train_ridge(X_train, y_train):
+    """
+    Train a ridge regression model.
+
+    Args:
+        X_train: write your description
+        y_train: write your description
+    """
     # lasso_regressor = Lasso()
     # model = lasso_regressor.fit(X_train, y_train)
 
@@ -104,6 +173,13 @@ def train_ridge(X_train, y_train):
     return model
 
 def train_random_forest(X_train, y_train):
+    """
+    Train a random forest model using the Random Forest algorithm.
+
+    Args:
+        X_train: write your description
+        y_train: write your description
+    """
 
     random_grid = {
                    #'max_depth': [10, 20, 40, 80, 100, None],
@@ -148,6 +224,13 @@ def train_random_forest(X_train, y_train):
 
 
 def train_svm(X_train, y_train):
+    """
+    Train a SVM model using GridSearchCV.
+
+    Args:
+        X_train: write your description
+        y_train: write your description
+    """
     svr = SVR(kernel = 'rbf')
 
     param_grid_svm = {'C':[0.001, 0.1, 1],'gamma': [1e-7,0.1]}
@@ -171,6 +254,13 @@ def train_svm(X_train, y_train):
 
 
 def train_gbm(X_train, y_train):
+    """
+    Train a GBM regressor.
+
+    Args:
+        X_train: write your description
+        y_train: write your description
+    """
     gbm = GradientBoostingRegressor(random_state = 42)
     # model = gbm.fit(X_train, y_train)
 
@@ -196,6 +286,13 @@ def train_gbm(X_train, y_train):
 
 
 def train_ada(X_train, y_train):
+    """
+    Trains the adaptive autoregressor using the GridSearchCV grid search algorithm.
+
+    Args:
+        X_train: write your description
+        y_train: write your description
+    """
     ada = AdaBoostRegressor()
 
     # model = ada.fit(X_train, y_train)
@@ -221,6 +318,14 @@ def train_ada(X_train, y_train):
 
 
 def evaluate_model(model, X_test, y_test):
+    """
+    Evaluate the model on test data.
+
+    Args:
+        model: write your description
+        X_test: write your description
+        y_test: write your description
+    """
     from sklearn.metrics import mean_squared_error
     #from sklearn.metrics import mean_squared_log_error
 
@@ -242,6 +347,16 @@ def evaluate_model(model, X_test, y_test):
 
 
 def append_return_table(df_predict, unique_datetime, y_trade_return, trade_tic, current_index):
+    """
+    Append the y_trade_return to the predict table.
+
+    Args:
+        df_predict: write your description
+        unique_datetime: write your description
+        y_trade_return: write your description
+        trade_tic: write your description
+        current_index: write your description
+    """
     tmp_table = pd.DataFrame(columns=trade_tic)
     tmp_table = tmp_table.append(pd.Series(y_trade_return, index=trade_tic), ignore_index=True)
     df_predict.loc[unique_datetime[current_index]][tmp_table.columns] = tmp_table.loc[0]
@@ -252,6 +367,22 @@ def run_4model(df,features_column, label_column,date_column,tic_column,
               first_trade_date_index=20,
               testing_windows=4,
               max_rolling_window_index=44):
+    """
+    Runs the 4 model analysis.
+
+    Args:
+        df: write your description
+        features_column: write your description
+        label_column: write your description
+        date_column: write your description
+        tic_column: write your description
+        unique_ticker: write your description
+        unique_datetime: write your description
+        trade_date: write your description
+        first_trade_date_index: write your description
+        testing_windows: write your description
+        max_rolling_window_index: write your description
+    """
     ## initialize all the result tables
     ## need date as index and unique tic name as columns
     df_predict_lr = pd.DataFrame(columns=unique_ticker, index=trade_date)
@@ -367,6 +498,13 @@ def run_4model(df,features_column, label_column,date_column,tic_column,
 
 
 def get_model_evaluation_table(evaluation_record,trade_date):
+    """
+    Returns a pandas DataFrame with the model evaluations for the trade_date trade_date.
+
+    Args:
+        evaluation_record: write your description
+        trade_date: write your description
+    """
     evaluation_list = []
     for d in trade_date:
         try:
@@ -378,6 +516,13 @@ def get_model_evaluation_table(evaluation_record,trade_date):
     return df_evaluation
 
 def save_model_result(sector_result,sector_name):
+    """
+    Save sector model result to CSV file.
+
+    Args:
+        sector_result: write your description
+        sector_name: write your description
+    """
     df_predict_lr = sector_result[0].astype(np.float64)
     df_predict_rf = sector_result[1].astype(np.float64)
     df_predict_ridge = sector_result[2].astype(np.float64)
@@ -411,6 +556,14 @@ def save_model_result(sector_result,sector_name):
 
 
 def calculate_sector_daily_return(daily_price, unique_ticker,trade_date):
+    """
+    Calculate daily return for each sector based on daily price and unique ticker.
+
+    Args:
+        daily_price: write your description
+        unique_ticker: write your description
+        trade_date: write your description
+    """
     daily_price_pivot = pd.pivot_table(daily_price, values='adj_price', index=['datadate'],
                        columns=['tic'], aggfunc=np.mean)
     daily_price_pivot=daily_price_pivot[unique_ticker]
@@ -420,6 +573,14 @@ def calculate_sector_daily_return(daily_price, unique_ticker,trade_date):
     return daily_return
 
 def calculate_sector_quarterly_return(daily_price, unique_ticker,trade_date_plus1):
+    """
+    Calculate sector quarterly return.
+
+    Args:
+        daily_price: write your description
+        unique_ticker: write your description
+        trade_date_plus1: write your description
+    """
     daily_price_pivot = pd.pivot_table(daily_price, values='adj_price', index=['datadate'],
                        columns=['tic'], aggfunc=np.mean)
     daily_price_pivot=daily_price_pivot[unique_ticker]
@@ -431,6 +592,12 @@ def calculate_sector_quarterly_return(daily_price, unique_ticker,trade_date_plus
     return quarterly_return
 
 def pick_stocks_based_on_quantiles_old(df_predict_best):
+    """
+    Returns a dictionary of quantiles based on the quantiles of the stock stocks.
+
+    Args:
+        df_predict_best: write your description
+    """
 
     quantile_0_25 = {}
     quantile_25_50 = {}
@@ -453,6 +620,12 @@ def pick_stocks_based_on_quantiles_old(df_predict_best):
     return (quantile_0_25, quantile_25_50, quantile_50_75, quantile_75_100)
 
 def pick_stocks_based_on_quantiles(df_predict_best):
+    """
+    Pick stocks based on quantiles.
+
+    Args:
+        df_predict_best: write your description
+    """
 
     quantile_0_30 = {}
 
@@ -470,6 +643,15 @@ def pick_stocks_based_on_quantiles(df_predict_best):
     return (quantile_0_30, quantile_70_100)
 
 def calculate_portfolio_return(daily_return,trade_date_plus1,long_dict,frequency_date):
+    """
+    Calculate portfolio return.
+
+    Args:
+        daily_return: write your description
+        trade_date_plus1: write your description
+        long_dict: write your description
+        frequency_date: write your description
+    """
     df_portfolio_return = pd.DataFrame(columns=['portfolio_return'])
 
     for i in range(len(trade_date_plus1) - 1):
@@ -489,6 +671,14 @@ def calculate_portfolio_return(daily_return,trade_date_plus1,long_dict,frequency
     return df_portfolio_return
 
 def calculate_portfolio_quarterly_return(quarterly_return,trade_date_plus1,long_dict):
+    """
+    Calculate daily daily return for each day in the period defined by the dictionary of long_dict.
+
+    Args:
+        quarterly_return: write your description
+        trade_date_plus1: write your description
+        long_dict: write your description
+    """
     df_portfolio_return = pd.DataFrame(columns=['portfolio_return'])
 
     for i in range(len(trade_date_plus1) - 1):
@@ -505,6 +695,15 @@ def calculate_portfolio_quarterly_return(quarterly_return,trade_date_plus1,long_
     return df_portfolio_return
 
 def long_only_strategy_daily(df_predict_return, daily_return, trade_month_plus1, top_quantile_threshold=0.75):
+    """
+    Strategy for long only portfolio based on daily return.
+
+    Args:
+        df_predict_return: write your description
+        daily_return: write your description
+        trade_month_plus1: write your description
+        top_quantile_threshold: write your description
+    """
     long_dict = {}
     for i in range(df_predict_return.shape[0]):
         top_q = df_predict_return.iloc[i].quantile(top_quantile_threshold)
@@ -544,6 +743,15 @@ def long_only_strategy_daily(df_predict_return, daily_return, trade_month_plus1,
 
 
 def long_only_strategy_monthly(df_predict_return, tic_monthly_return, trade_month, top_quantile_threshold=0.7):
+    """
+    Strategy for long only portfolio for a given trade_month.
+
+    Args:
+        df_predict_return: write your description
+        tic_monthly_return: write your description
+        trade_month: write your description
+        top_quantile_threshold: write your description
+    """
     long_dict = {}
     short_dict = {}
     for i in range(df_predict_return.shape[0]):
@@ -585,6 +793,14 @@ def long_only_strategy_monthly(df_predict_return, tic_monthly_return, trade_mont
 
 
 def plot_predict_return_distribution(df_predict_best,sector_name,out_path):
+    """
+    Plots the distribution of the predict return distribution for a sector.
+
+    Args:
+        df_predict_best: write your description
+        sector_name: write your description
+        out_path: write your description
+    """
     import matplotlib.pyplot as plt
 
     for i in range(df_predict_best.shape[0]):

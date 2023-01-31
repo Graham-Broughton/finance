@@ -27,6 +27,12 @@ class YahooFinanceProcessor:
     """
 
     def __init__(self):
+        """
+        Initialize the class with the default values.
+
+        Args:
+            self: write your description
+        """
         pass
 
     def download_data(
@@ -85,6 +91,13 @@ class YahooFinanceProcessor:
         return data_df
 
     def clean_data(self, data) -> pd.DataFrame:
+        """
+        Clean data to be used for the simulation.
+
+        Args:
+            self: write your description
+            data: write your description
+        """
 
         df = data.copy()
         df = df.rename(columns={"date": "time"})
@@ -320,6 +333,14 @@ class YahooFinanceProcessor:
         return price_array, tech_array, turbulence_array
 
     def get_trading_days(self, start, end):
+        """
+        Get a list of trading days between the given dates.
+
+        Args:
+            self: write your description
+            start: write your description
+            end: write your description
+        """
         nyse = tc.get_calendar("NYSE")
         df = nyse.sessions_in_range(
             pd.Timestamp(start),

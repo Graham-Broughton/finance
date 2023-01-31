@@ -160,6 +160,13 @@ class AgentBase:
         return self.convert_trajectory(traj_list, last_dones)  # traj_list
 
     def update_net(self, buffer: ReplayBuffer) -> tuple:
+        """
+        Return zero and zero values for net in the replay buffer.
+
+        Args:
+            self: write your description
+            buffer: write your description
+        """
         return 0.0, 0.0
 
     def get_obj_critic_raw(self, buffer: ReplayBuffer, batch_size: int) -> (Tensor, Tensor):
@@ -254,6 +261,13 @@ class AgentBase:
         """
 
         def load_torch_file(model, path: str):
+            """
+            Loads a torch. load file into the model.
+
+            Args:
+                model: write your description
+                path: write your description
+            """
             state_dict = torch.load(path, map_location=lambda storage, loc: storage)
             model.load_state_dict(state_dict)
 
@@ -280,6 +294,16 @@ class AgentBase:
             self, traj_list: List[Tuple[Tensor, ...]],
             last_done: Union[Tensor, list]
     ) -> List[Tensor]:
+        """
+        Convert the trajectory into a Tensors.
+
+        Args:
+            self: write your description
+            traj_list: write your description
+            List: write your description
+            Tuple: write your description
+            last_done: write your description
+        """
         # assert len(buf_items[0]) in {4, 5}
         # assert len(buf_items[0][0]) == self.env_num
         traj_list1 = list(map(list, zip(*traj_list)))  # state, reward, done, action, noise
@@ -334,6 +358,14 @@ class AgentBase:
         return traj_list3
 
     def get_q_sum(self, buf_reward: Tensor, buf_mask: Tensor) -> Tensor:
+        """
+        Calculates the sum of the buffer reward and mask.
+
+        Args:
+            self: write your description
+            buf_reward: write your description
+            buf_mask: write your description
+        """
         total_size = buf_reward.shape[0]
         buf_r_sum = torch.empty(total_size, dtype=torch.float32, device=self.device)  # reward sum
 
@@ -346,6 +378,17 @@ class AgentBase:
     def get_buf_h_term(
             self, buf_state: Tensor, buf_action: Tensor, buf_r_sum: Tensor, buf_mask: Tensor, buf_reward: Tensor
     ):
+        """
+        Computes the buffer of the h_term.
+
+        Args:
+            self: write your description
+            buf_state: write your description
+            buf_action: write your description
+            buf_r_sum: write your description
+            buf_mask: write your description
+            buf_reward: write your description
+        """
         q_arg_sort = np.argsort([item[3] for item in self.h_term_buffer])
         h_term_throw = max(0, int(len(self.h_term_buffer) * self.h_term_drop_rate))
         self.h_term_buffer = [self.h_term_buffer[i] for i in q_arg_sort[h_term_throw:]]
@@ -377,6 +420,12 @@ class AgentBase:
     def get_obj_h_term(
             self
     ) -> Tensor:
+        """
+        Returns the object - hyper - likelihood H - term
+
+        Args:
+            self: write your description
+        """
         if self.ten_state is None:
             return torch.zeros(1, dtype=torch.float32, device=self.device)
         total_size = self.ten_state.shape[0]
@@ -398,6 +447,16 @@ class AgentBase:
     def get_buf_h_term_k(
             self, buf_state: Tensor, buf_action: Tensor, buf_mask: Tensor, buf_reward: Tensor
     ):
+        """
+        Calculates the h_term_buffer from the buffer.
+
+        Args:
+            self: write your description
+            buf_state: write your description
+            buf_action: write your description
+            buf_mask: write your description
+            buf_reward: write your description
+        """
         buf_dones = torch.where(buf_mask == 0)[0].detach().cpu() + 1
         i = 0
         for j in buf_dones:
@@ -459,6 +518,14 @@ class AgentBase:
 
 
 def get_optim_param(optimizer: torch.optim) -> list:
+    """
+    Returns a list of all parameters of the optimizer.
+
+    Args:
+        optimizer: write your description
+        torch: write your description
+        optim: write your description
+    """
     params_list = []
     for params_dict in optimizer.state_dict()["state"].values():
         params_list.extend([t for t in params_dict.values() if isinstance(t, torch.Tensor)])

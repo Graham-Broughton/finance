@@ -14,10 +14,21 @@ data_url = "wss://data.alpaca.markets"
 
 @pytest.fixture(scope="session")
 def ticker_list():
+    """
+    List of tickers.
+
+    Args:
+    """
     return ["AAPL", "GOOG"]
 
 
 def test_intraDayBar_download(ticker_list):
+    """
+    This test shows that the data returned from the intra - day bar download function is the same
+
+    Args:
+        ticker_list: write your description
+    """
     # Given
     start_date = "2021-07-29"
     end_date = "2021-07-30"
@@ -69,6 +80,12 @@ def test_intraDayBar_download(ticker_list):
 
 
 def test_dayBar_download(ticker_list):
+    """
+    This tests dayBar. download_data with the same ticker_list.
+
+    Args:
+        ticker_list: write your description
+    """
     # Given
     start_date = "2021-07-29"
     end_date = "2021-07-30"

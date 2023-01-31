@@ -10,6 +10,16 @@ import torch
 
 class Arguments:
     def __init__(self, agent_class=None, env=None, env_func=None, env_args: dict = None):
+        """
+        Initializes the DRL agent.
+
+        Args:
+            self: write your description
+            agent_class: write your description
+            env: write your description
+            env_func: write your description
+            env_args: write your description
+        """
         self.env = env  # the environment for training
         self.env_func = env_func  # env = env_func(*env_args)
         self.env_args = env_args  # env = env_func(*env_args)
@@ -69,6 +79,12 @@ class Arguments:
         self.eval_env_args = None  # eval_env = eval_env_func(*eval_env_args)
 
     def init_before_training(self):
+        """
+        Initializes the environment before training.
+
+        Args:
+            self: write your description
+        """
         np.random.seed(self.random_seed)
         torch.manual_seed(self.random_seed)
         torch.set_num_threads(self.thread_num)
@@ -90,6 +106,13 @@ class Arguments:
         os.makedirs(self.cwd, exist_ok=True)
 
     def update_attr(self, attr: str):
+        """
+        Updates the attribute of the environment variable with the value of the environment variable.
+
+        Args:
+            self: write your description
+            attr: write your description
+        """
         try:
             attribute_value = getattr(self.env, attr) if self.env_args is None else self.env_args[attr]
         except Exception as error:
@@ -98,11 +121,23 @@ class Arguments:
         return attribute_value
 
     def if_off_policy(self) -> bool:
+        """
+        True if the current agent is if off policy.
+
+        Args:
+            self: write your description
+        """
         name = self.agent_class.__name__
         if_off_policy = all((name.find('PPO') == -1, name.find('A2C') == -1))
         return if_off_policy
 
     def print(self):
+        """
+        Prints out the arguments in a nicely readable format.
+
+        Args:
+            self: write your description
+        """
         # prints out args in a neat, readable format
         pprint(vars(self))
 
@@ -194,6 +229,12 @@ def get_gym_env_args(env, if_print=True) -> dict:  # [ElegantRL.2021.12.12]
 
 
 def kwargs_filter(func, kwargs: dict) -> dict:
+    """
+    Filters out kwargs that are not shared by all functions that are decorated with func.
+
+    Args:
+        func: write your description
+    """
     import inspect  # Python built-in package
 
     sign = inspect.signature(func).parameters.values()
@@ -205,6 +246,14 @@ def kwargs_filter(func, kwargs: dict) -> dict:
 
 
 def build_env(env=None, env_func=None, env_args: dict = None):  # [ElegantRL.2021.12.12]
+    """
+    Build an environment object.
+
+    Args:
+        env: write your description
+        env_func: write your description
+        env_args: write your description
+    """
     if env is not None:
         env = deepcopy(env)
     elif env_func.__module__ == 'gym.envs.registration':

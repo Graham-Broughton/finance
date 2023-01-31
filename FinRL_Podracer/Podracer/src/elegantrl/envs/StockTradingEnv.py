@@ -19,6 +19,19 @@ Modify: Github YonV1943
 class StockTradingEnv:
     def __init__(self, initial_amount=1e6, max_stock=1e2, buy_cost_pct=1e-3, sell_cost_pct=1e-3, gamma=0.99,
                  beg_idx=0, end_idx=1113):
+        """
+        Initializes the state of the market fund manager.
+
+        Args:
+            self: write your description
+            initial_amount: write your description
+            max_stock: write your description
+            buy_cost_pct: write your description
+            sell_cost_pct: write your description
+            gamma: write your description
+            beg_idx: write your description
+            end_idx: write your description
+        """
         self.df_pwd = './China_A_shares.pandas.dataframe'
         self.npz_pwd = './China_A_shares.numpy.npz'
 
@@ -55,6 +68,12 @@ class StockTradingEnv:
         self.target_return = +np.inf
 
     def reset(self):
+        """
+        Reset the state of the instrument to its initial state.
+
+        Args:
+            self: write your description
+        """
         self.day = 0
         if self.if_random_reset:
             self.amount = self.initial_amount * rd.uniform(0.9, 1.1)
@@ -68,6 +87,12 @@ class StockTradingEnv:
         return self.get_state()
 
     def get_state(self):
+        """
+        Return the state of the instrument.
+
+        Args:
+            self: write your description
+        """
         state = np.hstack((np.array(self.amount * 2 ** -16),
                            self.shares * 2 ** -9,
                            self.close_ary[self.day] * 2 ** -7,
@@ -75,6 +100,13 @@ class StockTradingEnv:
         return state
 
     def step(self, action):
+        """
+        Take a step in the simulation.
+
+        Args:
+            self: write your description
+            action: write your description
+        """
         self.day += 1
 
         action = action.copy()
@@ -109,6 +141,13 @@ class StockTradingEnv:
         return state, reward, done, {}
 
     def load_data_from_disk(self, tech_id_list=None):
+        """
+        Load data from disk.
+
+        Args:
+            self: write your description
+            tech_id_list: write your description
+        """
         tech_id_list = [
             "macd", "boll_ub", "boll_lb", "rsi_30", "cci_30", "dx_30", "close_30_sma", "close_60_sma",
         ] if tech_id_list is None else tech_id_list
@@ -146,6 +185,11 @@ class StockTradingEnv:
 
 
 def check_env():
+    """
+    Check the environment for safety.
+
+    Args:
+    """
     env = StockTradingEnv(beg_idx=834, end_idx=1113)
     env.if_random_reset = False
     evaluate_time = 4
@@ -275,6 +319,13 @@ def kwargs_filter(func, kwargs: dict):
 
 
 def build_env(env_func=None, env_args=None):
+    """
+    Builds a new environment.
+
+    Args:
+        env_func: write your description
+        env_args: write your description
+    """
     env = env_func(**kwargs_filter(env_func.__init__, env_args.copy()))
     return env
 
@@ -287,6 +338,16 @@ Modify: Github YonV1943
 
 class ActorPPO(nn.Module):
     def __init__(self, mid_dim, mid_layer_num, state_dim, action_dim):
+        """
+        Builds the latent function net
+
+        Args:
+            self: write your description
+            mid_dim: write your description
+            mid_layer_num: write your description
+            state_dim: write your description
+            action_dim: write your description
+        """
         super().__init__()
         self.net = build_fcn(mid_dim, mid_layer_num, inp_dim=state_dim, out_dim=action_dim)
 
@@ -295,9 +356,23 @@ class ActorPPO(nn.Module):
         self.sqrt_2pi_log = np.log(np.sqrt(2 * np.pi))
 
     def forward(self, state):
+        """
+        Returns the tangent of the given state.
+
+        Args:
+            self: write your description
+            state: write your description
+        """
         return self.net(state).tanh()  # action
 
     def get_action(self, state):
+        """
+        Get action and noise
+
+        Args:
+            self: write your description
+            state: write your description
+        """
         a_avg = self.net(state)
         a_std = self.a_std_log.exp()
 
@@ -306,10 +381,26 @@ class ActorPPO(nn.Module):
         return action, noise
 
     def get_old_logprob(self, _action, noise):
+        """
+        Get the log probability of the noise.
+
+        Args:
+            self: write your description
+            _action: write your description
+            noise: write your description
+        """
         delta = noise.pow(2) * 0.5
         return -(self.a_std_log + self.sqrt_2pi_log + delta).sum(1)  # old_logprob
 
     def get_logprob_entropy(self, state, action):
+        """
+        Get logprob and policy entropy for given state and action.
+
+        Args:
+            self: write your description
+            state: write your description
+            action: write your description
+        """
         a_avg = self.net(state)
         a_std = self.a_std_log.exp()
 
@@ -321,19 +412,51 @@ class ActorPPO(nn.Module):
 
     @staticmethod
     def get_a_to_e(action):  # convert action of network to action of environment
+        """
+        Get the a to e conversion from the network action.
+
+        Args:
+            action: write your description
+        """
         return action.tanh()
 
 
 class CriticPPO(nn.Module):
     def __init__(self, mid_dim, mid_layer_num, state_dim, _action_dim):
+        """
+        Builds the net and builds the action layer.
+
+        Args:
+            self: write your description
+            mid_dim: write your description
+            mid_layer_num: write your description
+            state_dim: write your description
+            _action_dim: write your description
+        """
         super().__init__()
         self.net = build_fcn(mid_dim, mid_layer_num, inp_dim=state_dim, out_dim=1)
 
     def forward(self, state):
+        """
+        Forward computation.
+
+        Args:
+            self: write your description
+            state: write your description
+        """
         return self.net(state)  # advantage value
 
 
 def build_fcn(mid_dim, mid_layer_num, inp_dim, out_dim):  # fcn (Fully Connected Network)
+    """
+    Builds the Fully Connected Network.
+
+    Args:
+        mid_dim: write your description
+        mid_layer_num: write your description
+        inp_dim: write your description
+        out_dim: write your description
+    """
     net_list = [nn.Linear(inp_dim, mid_dim), nn.ReLU(), ]
     for _ in range(mid_layer_num):
         net_list += [nn.Linear(mid_dim, mid_dim), nn.ReLU(), ]
@@ -343,6 +466,16 @@ def build_fcn(mid_dim, mid_layer_num, inp_dim, out_dim):  # fcn (Fully Connected
 
 class AgentPPO:
     def __init__(self, net_dim, state_dim, action_dim, gpu_id=0, args=None):
+        """
+        Initializes the agent.
+
+        Args:
+            self: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            gpu_id: write your description
+        """
         self.if_off_policy = False
         self.act_class = getattr(self, "act_class", ActorPPO)
         self.cri_class = getattr(self, "cri_class", CriticPPO)
@@ -386,6 +519,14 @@ class AgentPPO:
         self.lambda_entropy = getattr(args, "lambda_entropy", 0.02)  # could be 0.00~0.10
 
     def explore_env(self, env, target_step) -> list:
+        """
+        Runs the environment until the target_step is reached.
+
+        Args:
+            self: write your description
+            env: write your description
+            target_step: write your description
+        """
         traj_list = []
         last_done = [0, ]
         state = self.states[0]
@@ -453,6 +594,16 @@ class AgentPPO:
         return obj_critic.item(), -obj_actor.item(), a_std_log.item()  # logging_tuple
 
     def get_reward_sum(self, buf_len, buf_reward, buf_mask, buf_value):
+        """
+        Calculate the buffer reward sum and buffer advance v.
+
+        Args:
+            self: write your description
+            buf_len: write your description
+            buf_reward: write your description
+            buf_mask: write your description
+            buf_value: write your description
+        """
         buf_r_sum = torch.empty(buf_len, dtype=torch.float32, device=self.device)  # reward sum
 
         pre_r_sum = 0
@@ -463,6 +614,14 @@ class AgentPPO:
         return buf_r_sum, buf_adv_v
 
     def convert_trajectory(self, traj_list, _last_done):  # [ElegantRL.2022.01.01]
+        """
+        Convert the trajectory to the environment.
+
+        Args:
+            self: write your description
+            traj_list: write your description
+            _last_done: write your description
+        """
         # assert len(buf_items) == step_i
         # assert len(buf_items[0]) in {4, 5}
         # assert len(buf_items[0][0]) == self.env_num
@@ -481,6 +640,13 @@ class AgentPPO:
 
     @staticmethod
     def optimizer_update(optimizer, objective):
+        """
+        Update an optimizer with the given objective.
+
+        Args:
+            optimizer: write your description
+            objective: write your description
+        """
         optimizer.zero_grad()
         objective.backward()
         optimizer.step()
@@ -488,9 +654,22 @@ class AgentPPO:
 
 class ReplayBufferList(list):  # for on-policy
     def __init__(self):
+        """
+        Initialize the list.
+
+        Args:
+            self: write your description
+        """
         list.__init__(self)
 
     def update_buffer(self, traj_list):
+        """
+        Update the buffer with the given traj_list
+
+        Args:
+            self: write your description
+            traj_list: write your description
+        """
         cur_items = list(map(list, zip(*traj_list)))
         self[:] = [torch.cat(item, dim=0) for item in cur_items]
 
@@ -501,6 +680,15 @@ class ReplayBufferList(list):  # for on-policy
 
 class Arguments:
     def __init__(self, agent, env_func=None, env_args=None):
+        """
+        Initializes the rollout.
+
+        Args:
+            self: write your description
+            agent: write your description
+            env_func: write your description
+            env_args: write your description
+        """
         self.env_func = env_func  # env = env_func(*env_args)
         self.env_args = env_args  # env = env_func(*env_args)
 
@@ -548,6 +736,12 @@ class Arguments:
         self.eval_times = 2 ** 4  # number of times that get episode return
 
     def init_before_training(self):
+        """
+        Initializes the environment before training.
+
+        Args:
+            self: write your description
+        """
         np.random.seed(self.random_seed)
         torch.manual_seed(self.random_seed)
         torch.set_num_threads(self.thread_num)
@@ -569,11 +763,22 @@ class Arguments:
         os.makedirs(self.cwd, exist_ok=True)
 
     def get_if_off_policy(self):
+        """
+        Return True if the agent is trying to turn off the policy.
+
+        Args:
+            self: write your description
+        """
         name = self.agent.__name__
         return all((name.find('PPO') == -1, name.find('A2C') == -1))  # if_off_policy
 
 
 def train_agent(args):
+    """
+    Train the agent with the given arguments.
+
+    Args:
+    """
     torch.set_grad_enabled(False)
     args.init_before_training()
     gpu_id = args.learner_gpus
@@ -656,6 +861,13 @@ def get_episode_return_and_step(env, act) -> (float, int):  # [ElegantRL.2022.01
 
 
 def load_torch_file(model, _path):
+    """
+    Loads a torch. StateDict from a file.
+
+    Args:
+        model: write your description
+        _path: write your description
+    """
     state_dict = torch.load(_path, map_location=lambda storage, loc: storage)
     model.load_state_dict(state_dict)
 
@@ -664,6 +876,11 @@ def load_torch_file(model, _path):
 
 
 def run():
+    """
+    Run the AgentPPO.
+
+    Args:
+    """
     import sys
     gpu_id = int(sys.argv[1]) if len(sys.argv) > 1 else 0
     env = StockTradingEnv()
@@ -684,6 +901,12 @@ def run():
 
 
 def evaluate_models_in_directory(dir_path=None):
+    """
+    Evaluates all the models in a directory.
+
+    Args:
+        dir_path: write your description
+    """
     if dir_path is None:
         gpu_id = int(sys.argv[1])
         dir_path = f'StockTradingEnv-v2_PPO_{gpu_id}'

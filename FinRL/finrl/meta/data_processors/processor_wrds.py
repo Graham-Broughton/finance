@@ -14,6 +14,13 @@ pd.options.mode.chained_assignment = None
 
 class WrdsProcessor:
     def __init__(self, if_offline=False):
+        """
+        Initialize the database connection.
+
+        Args:
+            self: write your description
+            if_offline: write your description
+        """
         if not if_offline:
             self.db = wrds.Connection()
 
@@ -26,12 +33,31 @@ class WrdsProcessor:
         if_save_tempfile=False,
         filter_shares=0,
     ):
+        """
+        Download data from the database.
+
+        Args:
+            self: write your description
+            start_date: write your description
+            end_date: write your description
+            ticker_list: write your description
+            time_interval: write your description
+            if_save_tempfile: write your description
+            filter_shares: write your description
+        """
 
         self.start = start_date
         self.end = end_date
         self.time_interval = time_interval
 
         def get_trading_days(start, end):
+            """
+            Get a list of trading days between two dates.
+
+            Args:
+                start: write your description
+                end: write your description
+            """
             nyse = tc.get_calendar("NYSE")
             df = nyse.sessions_in_range(
                 pd.Timestamp(start, tz=pytz.UTC), pd.Timestamp(end, tz=pytz.UTC)
@@ -43,6 +69,14 @@ class WrdsProcessor:
             return trading_days
 
         def data_fetch_wrds(date="2021-05-01", stock_set=("AAPL"), time_interval=60):
+            """
+            Fetch writts from the database.
+
+            Args:
+                date: write your description
+                stock_set: write your description
+                time_interval: write your description
+            """
             # start_date, end_date should be in the same year
             current_date = datetime.datetime.strptime(date, "%Y-%m-%d")
             lib = "taqm_" + str(current_date.year)  # taqm_2021
@@ -100,6 +134,14 @@ class WrdsProcessor:
             return result
 
     def preprocess_to_ohlcv(self, df, time_interval="60S"):
+        """
+        This preprocessing function converts the dataframe to OHLCV format.
+
+        Args:
+            self: write your description
+            df: write your description
+            time_interval: write your description
+        """
         df = df[["date", "time_m", "sym_root", "size", "price"]]
         tic_list = np.unique(df["sym_root"].values)
         final_df = None
@@ -132,6 +174,13 @@ class WrdsProcessor:
         return final_df
 
     def clean_data(self, df):
+        """
+        This method removes the 16 - 000 data and sorts the data into a standard format.
+
+        Args:
+            self: write your description
+            df: write your description
+        """
         df = df[["time", "open", "high", "low", "close", "volume", "tic"]]
         # remove 16:00 data
         tic_list = np.unique(df["tic"].values)
@@ -213,6 +262,14 @@ class WrdsProcessor:
             "close_60_sma",
         ],
     ):
+        """
+        Add technical indicator to stock dataframe.
+
+        Args:
+            self: write your description
+            df: write your description
+            tech_indicator_list: write your description
+        """
         df = df.rename(columns={"time": "date"})
         df = df.copy()
         df = df.sort_values(by=["tic", "date"])
@@ -240,6 +297,14 @@ class WrdsProcessor:
         return df
 
     def calculate_turbulence(self, data, time_period=252):
+        """
+        Calculate turbulence for a given time period.
+
+        Args:
+            self: write your description
+            data: write your description
+            time_period: write your description
+        """
         # can add other market assets
         df = data.copy()
         df_price_pivot = df.pivot(index="date", columns="tic", values="close")
@@ -300,6 +365,13 @@ class WrdsProcessor:
         return df
 
     def add_vix(self, data):
+        """
+        Add data frame with Vix data.
+
+        Args:
+            self: write your description
+            data: write your description
+        """
         vix_df = self.download_data(
             ["vix"], self.start, self.end_date, self.time_interval
         )
@@ -313,6 +385,14 @@ class WrdsProcessor:
         return df
 
     def df_to_array(self, df, tech_indicator_list):
+        """
+        Convert a dataframe to a numpy array.
+
+        Args:
+            self: write your description
+            df: write your description
+            tech_indicator_list: write your description
+        """
         unique_ticker = df.tic.unique()
         print(unique_ticker)
         if_first_time = True

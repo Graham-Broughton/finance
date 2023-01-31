@@ -7,6 +7,19 @@ import torch
 
 class Evaluator:
     def __init__(self, cwd, agent_id, eval_times1, eval_times2, eval_gap, env, device):
+        """
+        Initializes the recorder.
+
+        Args:
+            self: write your description
+            cwd: write your description
+            agent_id: write your description
+            eval_times1: write your description
+            eval_times2: write your description
+            eval_gap: write your description
+            env: write your description
+            device: write your description
+        """
         self.recorder = list()  # total_step, r_avg, r_std, obj_c, ...
         self.recorder_path = f'{cwd}/recorder.npy'
         self.r_max = -np.inf
@@ -30,6 +43,13 @@ class Evaluator:
               f"{'expR':>8}{'objC':>7}{'etc.':>7}")
 
     def save_or_load_recoder(self, if_save):
+        """
+        Save or load the recorder.
+
+        Args:
+            self: write your description
+            if_save: write your description
+        """
         if if_save:
             np.save(self.recorder_path, self.recorder)
         elif os.path.exists(self.recorder_path):
@@ -38,6 +58,16 @@ class Evaluator:
             self.total_step = self.recorder[-1][0]
 
     def evaluate_and_save(self, act, steps, r_exp, log_tuple) -> bool:
+        """
+        Evaluate actor and save policy network.
+
+        Args:
+            self: write your description
+            act: write your description
+            steps: write your description
+            r_exp: write your description
+            log_tuple: write your description
+        """
         self.total_step += steps  # update total training steps
 
         if time.time() - self.eval_time < self.eval_gap:
@@ -78,6 +108,12 @@ class Evaluator:
         return if_reach_goal
 
     def draw_plot(self):
+        """
+        Save learning curve to file.
+
+        Args:
+            self: write your description
+        """
         if len(self.recorder) == 0:
             print("| save_npy_draw_plot() WARNNING: len(self.recorder)==0")
             return None
@@ -93,6 +129,12 @@ class Evaluator:
 
     @staticmethod
     def get_r_avg_std_s_avg_std(rewards_steps_list):
+        """
+        Calculates the average standard deviation of episode return and episode step.
+
+        Args:
+            rewards_steps_list: write your description
+        """
         rewards_steps_ary = np.array(rewards_steps_list, dtype=np.float)
         r_avg, s_avg = rewards_steps_ary.mean(axis=0)  # average of episode return and episode step
         r_std, s_std = rewards_steps_ary.std(axis=0)  # standard dev. of episode return and episode step
@@ -100,6 +142,14 @@ class Evaluator:
 
 
 def get_episode_return_and_step(env, act, device) -> (float, int):
+    """
+    Runs the given action and returns the return value and the step.
+
+    Args:
+        env: write your description
+        act: write your description
+        device: write your description
+    """
     episode_return = 0.0  # sum of rewards in an episode
     episode_step = 1
     max_step = env.max_step
@@ -121,6 +171,15 @@ def get_episode_return_and_step(env, act, device) -> (float, int):
 
 
 def save_learning_curve(recorder, cwd='.', save_title='learning curve', fig_name='plot_learning_curve.jpg'):
+    """
+    Save learning curve.
+
+    Args:
+        recorder: write your description
+        cwd: write your description
+        save_title: write your description
+        fig_name: write your description
+    """
     recorder = np.array(recorder)  # recorder_ary.append((self.total_step, r_avg, r_std, obj_a, obj_c))
     steps = recorder[:, 0]  # x-axis is training steps
     r_avg = recorder[:, 1]

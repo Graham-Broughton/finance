@@ -95,6 +95,12 @@ def init_agent(args: Arguments, gpu_id: int, env=None) -> AgentBase:
 
 
 def init_buffer(args: Arguments, gpu_id: int) -> [ReplayBuffer or ReplayBufferList]:
+    """
+    Initializes a buffer for the given GPU.
+
+    Args:
+        gpu_id: write your description
+    """
     if args.if_off_policy:
         buffer = ReplayBuffer(gpu_id=gpu_id,
                               max_capacity=args.max_memo,
@@ -108,6 +114,12 @@ def init_buffer(args: Arguments, gpu_id: int) -> [ReplayBuffer or ReplayBufferLi
 
 
 def init_evaluator(args: Arguments, gpu_id: int) -> Evaluator:
+    """
+    Initialize evaluator.
+
+    Args:
+        gpu_id: write your description
+    """
     eval_func = args.eval_env_func if getattr(args, "eval_env_func") else args.env_func
     eval_args = args.eval_env_args if getattr(args, "eval_env_args") else args.env_args
     eval_env = build_env(args.env, eval_func, eval_args)
@@ -119,6 +131,11 @@ def init_evaluator(args: Arguments, gpu_id: int) -> Evaluator:
 
 
 def train_and_evaluate_mp(args: Arguments):
+    """
+    Runs the multiprocessing pipeline and evaluates the model.
+
+    Args:
+    """
     args.init_before_training()
 
     process = list()
@@ -143,11 +160,25 @@ def train_and_evaluate_mp(args: Arguments):
 
 class PipeWorker:
     def __init__(self, worker_num: int):
+        """
+        Initialize the pump.
+
+        Args:
+            self: write your description
+            worker_num: write your description
+        """
         self.worker_num = worker_num
         self.pipes = [mp.Pipe() for _ in range(worker_num)]
         self.pipe1s = [pipe[1] for pipe in self.pipes]
 
     def explore(self, agent: AgentBase):
+        """
+        Runs the exploration pipeline on the given agent.
+
+        Args:
+            self: write your description
+            agent: write your description
+        """
         act_dict = agent.act.state_dict()
 
         for worker_id in range(self.worker_num):
@@ -157,6 +188,13 @@ class PipeWorker:
         return traj_lists
 
     def run(self, args: Arguments, worker_id: int):
+        """
+        Runs the worker.
+
+        Args:
+            self: write your description
+            worker_id: write your description
+        """
         torch.set_grad_enabled(False)
         gpu_id = args.learner_gpus
 
@@ -180,10 +218,27 @@ class PipeWorker:
 
 class PipeLearner:
     def __init__(self):
+        """
+        Initialize the class with the default values.
+
+        Args:
+            self: write your description
+        """
         pass
 
     @staticmethod
     def run(args: Arguments, comm_eva: mp.Pipe, comm_exp: mp.Pipe):
+        """
+        Run the main loop.
+
+        Args:
+            comm_eva: write your description
+            mp: write your description
+            Pipe: write your description
+            comm_exp: write your description
+            mp: write your description
+            Pipe: write your description
+        """
         torch.set_grad_enabled(False)
         gpu_id = args.learner_gpus
         cwd = args.cwd
@@ -219,9 +274,25 @@ class PipeLearner:
 
 class PipeEvaluator:
     def __init__(self):
+        """
+        Initialize the pipe.
+
+        Args:
+            self: write your description
+        """
         self.pipe0, self.pipe1 = mp.Pipe()
 
     def evaluate_and_save_mp(self, act, steps: int, r_exp: float, logging_tuple: tuple) -> (bool, bool):
+        """
+        Evaluate and save the agent.
+
+        Args:
+            self: write your description
+            act: write your description
+            steps: write your description
+            r_exp: write your description
+            logging_tuple: write your description
+        """
         if self.pipe1.poll():  # if_evaluator_idle
             if_train, if_save_agent = self.pipe1.recv()
             act_state_dict = act.state_dict().copy()  # deepcopy(act.state_dict())
@@ -234,6 +305,12 @@ class PipeEvaluator:
         return if_train, if_save_agent
 
     def run(self, args: Arguments):
+        """
+        Run the main loop.
+
+        Args:
+            self: write your description
+        """
         torch.set_grad_enabled(False)
         gpu_id = args.learner_gpus
 
@@ -280,6 +357,12 @@ class PipeEvaluator:
 
 
 def process_safely_terminate(process: list):
+    """
+    Kills all processes in process.
+
+    Args:
+        process: write your description
+    """
     for p in process:
         try:
             p.kill()

@@ -11,22 +11,45 @@ from finrl.meta.preprocessor.yahoodownloader import YahooDownloader
 
 @pytest.fixture(scope="session")
 def ticker_list():
+    """
+    List of tickers.
+
+    Args:
+    """
     return ["AAPL", "GOOG"]
 
 
 @pytest.fixture(scope="session")
 def indicator_list():
+    """
+    List of indicator classes
+
+    Args:
+    """
     return ["open", "close", "high", "low", "volume"]
 
 
 @pytest.fixture(scope="session")
 def data(ticker_list):
+    """
+    Download Yahoo Finance data.
+
+    Args:
+        ticker_list: write your description
+    """
     return YahooDownloader(
         start_date="2019-01-01", end_date="2019-02-01", ticker_list=ticker_list
     ).fetch_data()
 
 
 def test_zero_step(data, ticker_list):
+    """
+    Test that the environment can perform a zero step of trading.
+
+    Args:
+        data: write your description
+        ticker_list: write your description
+    """
     # Prove that zero actions results in zero stock buys, and no price changes
     init_amt = 1e6
     env = StockTradingEnvCashpenalty(
@@ -53,6 +76,13 @@ def test_zero_step(data, ticker_list):
 
 
 def test_patient(data, ticker_list):
+    """
+    Test the workflow of the patient.
+
+    Args:
+        data: write your description
+        ticker_list: write your description
+    """
     # Prove that we just not buying any new assets if running out of cash and the cycle is not ended
     aapl_first_close = data[data["tic"] == "AAPL"].head(1)["close"].values[0]
     init_amt = aapl_first_close
@@ -77,21 +107,42 @@ def test_patient(data, ticker_list):
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_cost_penalties():
+    """
+    Test for cost penalties.
+
+    Args:
+    """
     raise NotImplementedError
 
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_purchases():
+    """
+    Test that all purchases are available.
+
+    Args:
+    """
     raise NotImplementedError
 
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_gains():
+    """
+    Test if the IRS should gain a value.
+
+    Args:
+    """
     raise NotImplementedError
 
 
 @pytest.mark.skip(reason="this test is not working correctly")
 def test_validate_caching(data):
+    """
+    Validate that results with or without caching can be validated.
+
+    Args:
+        data: write your description
+    """
     # prove that results with or without caching don't change anything
     init_amt = 1e6
     env_uncached = StockTradingEnvCashpenalty(

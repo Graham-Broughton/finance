@@ -11,10 +11,34 @@ from stockstats import StockDataFrame as Sdf
 
 class CCXTEngineer:
     def __init__(self):
+        """
+        Initialize the binance object.
+
+        Args:
+            self: write your description
+        """
         self.binance = ccxt.binance()
 
     def data_fetch(self, start, end, pair_list=["BTC/USDT"], period="1m"):
+        """
+        Fetch data from the Binance database.
+
+        Args:
+            self: write your description
+            start: write your description
+            end: write your description
+            pair_list: write your description
+            period: write your description
+        """
         def min_ohlcv(dt, pair, limit):
+            """
+            Get the OHLCV for a given pair of dates.
+
+            Args:
+                dt: write your description
+                pair: write your description
+                limit: write your description
+            """
             since = calendar.timegm(dt.utctimetuple()) * 1000
             ohlcv = self.binance.fetch_ohlcv(
                 symbol=pair, timeframe="1m", since=since, limit=limit
@@ -22,6 +46,14 @@ class CCXTEngineer:
             return ohlcv
 
         def ohlcv(dt, pair, period="1d"):
+            """
+            DataFrame of Ohlcv values for given pair of dates.
+
+            Args:
+                dt: write your description
+                pair: write your description
+                period: write your description
+            """
             ohlcv = []
             limit = 1000
             if period == "1m":
@@ -100,6 +132,15 @@ class CCXTEngineer:
             "close_60_sma",
         ],
     ):
+        """
+        Add technical indicators to a dataframe.
+
+        Args:
+            self: write your description
+            df: write your description
+            pair_list: write your description
+            tech_indicator_list: write your description
+        """
         df = df.dropna()
         df = df.copy()
         column_list = [
@@ -137,6 +178,15 @@ class CCXTEngineer:
             "close_60_sma",
         ],
     ):
+        """
+        Convert dataframe to array.
+
+        Args:
+            self: write your description
+            df: write your description
+            pair_list: write your description
+            tech_indicator_list: write your description
+        """
         df = df.dropna()
         date_ary = df.index.values
         price_array = df[pd.MultiIndex.from_product([pair_list, ["close"]])].values

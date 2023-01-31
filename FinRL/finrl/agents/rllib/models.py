@@ -39,6 +39,16 @@ class DRLAgent:
     """
 
     def __init__(self, env, price_array, tech_array, turbulence_array):
+        """
+        Initialize the internal data structures.
+
+        Args:
+            self: write your description
+            env: write your description
+            price_array: write your description
+            tech_array: write your description
+            turbulence_array: write your description
+        """
         self.env = env
         self.price_array = price_array
         self.tech_array = tech_array
@@ -51,6 +61,13 @@ class DRLAgent:
         # policy_kwargs=None,
         # model_kwargs=None,
     ):
+        """
+        Returns a model and model_config for the specified model_name.
+
+        Args:
+            self: write your description
+            model_name: write your description
+        """
         if model_name not in MODELS:
             raise NotImplementedError("NotImplementedError")
 
@@ -80,6 +97,17 @@ class DRLAgent:
     def train_model(
         self, model, model_name, model_config, total_episodes=100, init_ray=True
     ):
+        """
+        Train a model.
+
+        Args:
+            self: write your description
+            model: write your description
+            model_name: write your description
+            model_config: write your description
+            total_episodes: write your description
+            init_ray: write your description
+        """
         if model_name not in MODELS:
             raise NotImplementedError("NotImplementedError")
         if init_ray:
@@ -118,6 +146,17 @@ class DRLAgent:
         turbulence_array,
         agent_path="./test_ppo/checkpoint_000100/checkpoint-100",
     ):
+        """
+        Run a DRL model.
+
+        Args:
+            model_name: write your description
+            env: write your description
+            price_array: write your description
+            tech_array: write your description
+            turbulence_array: write your description
+            agent_path: write your description
+        """
         if model_name not in MODELS:
             raise NotImplementedError("NotImplementedError")
 

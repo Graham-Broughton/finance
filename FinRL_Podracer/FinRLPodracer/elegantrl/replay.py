@@ -34,6 +34,14 @@ class ReplayBuffer:
         self.buf_state = torch.empty((max_len, state_dim), dtype=torch.float32, device=self.device)
 
     def append_buffer(self, state, other):  # CPU array to CPU array
+        """
+        Append a buffer to the buffer.
+
+        Args:
+            self: write your description
+            state: write your description
+            other: write your description
+        """
         self.buf_state[self.next_idx] = state
         self.buf_other[self.next_idx] = other
 
@@ -46,6 +54,14 @@ class ReplayBuffer:
             self.next_idx = 0
 
     def extend_buffer(self, state, other):  # CPU array to CPU array
+        """
+        Extend the internal buffer with the contents of another CPU array.
+
+        Args:
+            self: write your description
+            state: write your description
+            other: write your description
+        """
         size = len(other)
         next_idx = self.next_idx + size
 
@@ -153,9 +169,25 @@ class ReplayBuffer:
         print(f"std = np.{repr(ary_std).replace('=float32', '=np.float32')}")
 
     def td_error_update(self, td_error):
+        """
+        Update the error for the current node and all descendants.
+
+        Args:
+            self: write your description
+            td_error: write your description
+        """
         self.per_tree.td_error_update(td_error)
 
     def save_or_load_history(self, cwd, if_save, buffer_id=0):
+        """
+        Saves buffer state or load history.
+
+        Args:
+            self: write your description
+            cwd: write your description
+            if_save: write your description
+            buffer_id: write your description
+        """
         save_path = f"{cwd}/replay_{buffer_id}.npz"
 
         if if_save:  # todo should save done=True as end
@@ -204,6 +236,13 @@ class ReplayBufferMP:
                         for _ in range(worker_num)]
 
     def sample_batch(self, batch_size) -> list:
+        """
+        Sample batch of batch_size samples from each worker in the pool.
+
+        Args:
+            self: write your description
+            batch_size: write your description
+        """
         bs = batch_size // self.worker_num
         list_items = [self.buffers[i].sample_batch(bs)
                       for i in range(self.worker_num)]
@@ -217,21 +256,50 @@ class ReplayBufferMP:
         return [torch.cat(item, dim=0) for item in list_items]
 
     def update_now_len(self):
+        """
+        Update the length of the current time in all the buffers.
+
+        Args:
+            self: write your description
+        """
         self.now_len = 0
         for buffer in self.buffers:
             buffer.update_now_len()
             self.now_len += buffer.now_len
 
     def print_state_norm(self, neg_avg=None, div_std=None):  # non-essential
+        """
+        Print the state norm of all buffers.
+
+        Args:
+            self: write your description
+            neg_avg: write your description
+            div_std: write your description
+        """
         # for buffer in self.l_buffer:
         self.buffers[0].print_state_norm(neg_avg, div_std)
 
     def td_error_update(self, td_error):
+        """
+        Update the td_error for all workers in the tree.
+
+        Args:
+            self: write your description
+            td_error: write your description
+        """
         td_errors = td_error.view(self.worker_num, -1, 1)
         for i in range(self.worker_num):
             self.buffers[i].per_tree.td_error_update(td_errors[i])
 
     def save_or_load_history(self, cwd, if_save):
+        """
+        Save or load the history of the current working copy.
+
+        Args:
+            self: write your description
+            cwd: write your description
+            if_save: write your description
+        """
         for i in range(self.worker_num):
             self.buffers[i].save_or_load_history(cwd, if_save, buffer_id=i)
 
@@ -245,6 +313,13 @@ class BinarySearchTree:
     """
 
     def __init__(self, memo_len):
+        """
+        Initializes the replay buffer.
+
+        Args:
+            self: write your description
+            memo_len: write your description
+        """
         self.memo_len = memo_len  # replay buffer len
         self.prob_ary = np.zeros((memo_len - 1) + memo_len)  # parent_nodes_num + leaf_nodes_num
         self.max_len = len(self.prob_ary)
@@ -259,6 +334,14 @@ class BinarySearchTree:
         self.per_beta = 0.4  # beta = (PER:0, NotPER:1)
 
     def update_id(self, data_id, prob=10):  # 10 is max_prob
+        """
+        Updates the tree with the given data id and the given probability.
+
+        Args:
+            self: write your description
+            data_id: write your description
+            prob: write your description
+        """
         tree_id = data_id + self.memo_len - 1
         if self.now_len == tree_id:
             self.now_len += 1
@@ -271,6 +354,14 @@ class BinarySearchTree:
             self.prob_ary[tree_id] += delta
 
     def update_ids(self, data_ids, prob=10):  # 10 is max_prob
+        """
+        Updates the prob_ary with the given ids.
+
+        Args:
+            self: write your description
+            data_ids: write your description
+            prob: write your description
+        """
         ids = data_ids + self.memo_len - 1
         self.now_len += (ids >= self.now_len).sum()
 
@@ -314,6 +405,15 @@ class BinarySearchTree:
         return min(leaf_idx, self.now_len - 2)  # leaf_idx
 
     def get_indices_is_weights(self, batch_size, beg, end):
+        """
+        Get indices and is weights for sampling.
+
+        Args:
+            self: write your description
+            batch_size: write your description
+            beg: write your description
+            end: write your description
+        """
         self.per_beta = min(1., self.per_beta + 0.001)
 
         # get random values for searching indices with proportional prioritization
@@ -328,6 +428,13 @@ class BinarySearchTree:
         return self.indices, is_weights
 
     def td_error_update(self, td_error):  # td_error = (q-q).detach_().abs()
+        """
+        Update the trajectories with the given td_error.
+
+        Args:
+            self: write your description
+            td_error: write your description
+        """
         prob = td_error.squeeze().clamp(1e-6, 10).pow(self.per_alpha)
         prob = prob.cpu().numpy()
         self.update_ids(self.indices, prob)

@@ -34,6 +34,12 @@ def data_split(df, start, end, target_date_col="date"):
 
 
 def convert_to_datetime(time):
+    """
+    Convert time to datetime. datetime.
+
+    Args:
+        time: write your description
+    """
     time_fmt = "%Y-%m-%dT%H:%M:%S"
     if isinstance(time, str):
         return datetime.datetime.strptime(time, time_fmt)
@@ -68,6 +74,19 @@ class FeatureEngineer:
         use_turbulence=False,
         user_defined_feature=False,
     ):
+        """
+        Initializes the configuration.
+
+        Args:
+            self: write your description
+            use_technical_indicator: write your description
+            tech_indicator_list: write your description
+            config: write your description
+            INDICATORS: write your description
+            use_vix: write your description
+            use_turbulence: write your description
+            user_defined_feature: write your description
+        """
         self.use_technical_indicator = use_technical_indicator
         self.tech_indicator_list = tech_indicator_list
         self.use_vix = use_vix

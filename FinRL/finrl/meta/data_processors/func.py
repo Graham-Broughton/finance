@@ -7,10 +7,22 @@ import os
 # filename: str
 # output: stockname
 def calc_stockname_from_filename(filename):
+    """
+    Calculate the stockname from a filename
+
+    Args:
+        filename: write your description
+    """
     return filename.split("/")[-1].split(".csv")[0]
 
 
 def calc_all_filenames(path):
+    """
+    Returns a list of all filenames in the given path.
+
+    Args:
+        path: write your description
+    """
     dir_list = os.listdir(path)
     dir_list.sort()
     paths2 = []
@@ -22,6 +34,12 @@ def calc_all_filenames(path):
 
 
 def calc_stocknames(path):
+    """
+    Calculate stocknames for a file
+
+    Args:
+        path: write your description
+    """
     filenames = calc_all_filenames(path)
     res = []
     for filename in filenames:
@@ -31,6 +49,13 @@ def calc_stocknames(path):
 
 
 def remove_all_files(remove, path_of_data):
+    """
+    Remove all files in a directory
+
+    Args:
+        remove: write your description
+        path_of_data: write your description
+    """
     assert remove in [0, 1]
     if remove == 1:
         os.system("rm -f " + path_of_data + "/*")
@@ -59,8 +84,20 @@ def remove_all_files(remove, path_of_data):
 
 
 def date2str(dat):
+    """
+    Convert date to string
+
+    Args:
+        dat: write your description
+    """
     return datetime.date.strftime(dat, "%Y-%m-%d")
 
 
 def str2date(str_dat):
+    """
+    Convert string to date.
+
+    Args:
+        str_dat: write your description
+    """
     return datetime.datetime.strptime(str_dat, "%Y-%m-%d").date()

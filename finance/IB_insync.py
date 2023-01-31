@@ -16,6 +16,12 @@ stock = ib_insync.Stock('AAPL', 'SMART', 'USD')
 
 
 def onPendingTickers(tickers):
+    """
+    Print pending tickers.
+
+    Args:
+        tickers: write your description
+    """
     print("Ticker received")
     print(tickers)
 

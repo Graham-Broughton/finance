@@ -17,6 +17,28 @@ class StockEnvNAS89(gym.Env, ABC):
                  max_stock=1e2, initial_capital=1e6, buy_cost_pct=1e-3, sell_cost_pct=1e-3,
                  start_date='2008-03-19', end_date='2016-01-01', data_gap=4, reward_scaling=2 ** -13,
                  ticker_list=None, tech_indicator_list=None, initial_stocks=None, if_eval=False):
+        """
+        Load data from the data directory.
+
+        Args:
+            self: write your description
+            cwd: write your description
+            gamma: write your description
+            turbulence_thresh: write your description
+            min_stock_rate: write your description
+            max_stock: write your description
+            initial_capital: write your description
+            buy_cost_pct: write your description
+            sell_cost_pct: write your description
+            start_date: write your description
+            end_date: write your description
+            data_gap: write your description
+            reward_scaling: write your description
+            ticker_list: write your description
+            tech_indicator_list: write your description
+            initial_stocks: write your description
+            if_eval: write your description
+        """
         cwd = '.'
 
         self.min_stock_rate = min_stock_rate
@@ -70,6 +92,12 @@ class StockEnvNAS89(gym.Env, ABC):
         self.action_space = gym.spaces.Box(low=-1, high=1, shape=(self.action_dim,), dtype=np.float32)
 
     def reset(self):
+        """
+        Reset the state of the instrument to its initial state.
+
+        Args:
+            self: write your description
+        """
         self.day = 0
         price = self.price_ary[self.day]
 
@@ -83,6 +111,13 @@ class StockEnvNAS89(gym.Env, ABC):
         return self.get_state(price)  # state
 
     def step(self, actions):
+        """
+        Take one step of the simulation.
+
+        Args:
+            self: write your description
+            actions: write your description
+        """
         actions = (actions * self.max_stock).astype(int)
 
         self.day += 1
@@ -123,6 +158,13 @@ class StockEnvNAS89(gym.Env, ABC):
         return state, reward, done, dict()
 
     def get_state(self, price):
+        """
+        Get the state of the instrument at the given price.
+
+        Args:
+            self: write your description
+            price: write your description
+        """
         amount = np.array(max(self.amount, 1e4) * (2 ** -12), dtype=np.float32)
         scale = np.array(2 ** -6, dtype=np.float32)
         return np.hstack((amount,
@@ -136,6 +178,17 @@ class StockEnvNAS89(gym.Env, ABC):
 
     def load_data(self, cwd='../', ticker_list=None, tech_indicator_list=None,
                   start_date='2016-01-03', end_date='2021-05-27'):
+        """
+        Load the data for the market data.
+
+        Args:
+            self: write your description
+            cwd: write your description
+            ticker_list: write your description
+            tech_indicator_list: write your description
+            start_date: write your description
+            end_date: write your description
+        """
         data_name = 'NAS89_minute'
         raw_data1_path = f'{"FinRLPodracer/finrl"}/StockEnv_{data_name}_raw_data1.df'
         raw_data2_path = f'{"FinRLPodracer/finrl"}/StockEnv_{data_name}_raw_data2.df'
@@ -242,6 +295,13 @@ class StockEnvNAS89(gym.Env, ABC):
         return processed_df
 
     def draw_cumulative_return(self, args, _torch) -> list:
+        """
+        Draws the cumulative return.
+
+        Args:
+            self: write your description
+            _torch: write your description
+        """
         state_dim = self.state_dim
         action_dim = self.action_dim
 
@@ -280,6 +340,14 @@ class StockEnvNAS89(gym.Env, ABC):
         return episode_returns
 
     def deal_with_split_or_merge_shares(self, price_ary, tech_ary):
+        """
+        Split shares into two arrays and deal with split shares
+
+        Args:
+            self: write your description
+            price_ary: write your description
+            tech_ary: write your description
+        """
         # print(price_ary.shape)  # (528026, 93)
         # print(tech_ary.shape)  # (528026, 93 * 7)
         tech_ary = tech_ary.reshape((tech_ary.shape[0], -1, 7))
@@ -322,6 +390,12 @@ class StockEnvNAS89(gym.Env, ABC):
 
     @staticmethod
     def fill_nan_with_next_value(ary):
+        """
+        Finds the next value in an array that is nan.
+
+        Args:
+            ary: write your description
+        """
         x_isnan = np.isnan(ary)
         value = ary[np.where(~x_isnan)[0][0]]  # find the first value != nan
         for k in range(ary.shape[0]):
@@ -332,6 +406,13 @@ class StockEnvNAS89(gym.Env, ABC):
 
     @staticmethod
     def get_raw_data(raw_data_path, ticker_list):
+        """
+        Download raw data from Yahoo Finance.
+
+        Args:
+            raw_data_path: write your description
+            ticker_list: write your description
+        """
         if os.path.exists(raw_data_path):
             raw_df = pd.read_pickle(raw_data_path)  # DataFrame of Pandas
             # print('| raw_df.columns.values:', raw_df.columns.values)
@@ -347,6 +428,13 @@ class StockEnvNAS89(gym.Env, ABC):
 
     @staticmethod
     def convert_df_to_ary(df, tech_indicator_list):
+        """
+        Convert a dataframe of tech items into a price and turbulence array.
+
+        Args:
+            df: write your description
+            tech_indicator_list: write your description
+        """
         tech_ary = list()
         price_ary = list()
 
@@ -366,13 +454,31 @@ class StockEnvNAS89(gym.Env, ABC):
 
     @staticmethod
     def sigmoid_sign(ary, thresh):
+        """
+        Sigmoid function for thresholding the signal
+
+        Args:
+            ary: write your description
+            thresh: write your description
+        """
         def sigmoid(x):
+            """
+            Sigmoid function of the sigmoid function of the distribution.
+
+            Args:
+                x: write your description
+            """
             return 1 / (1 + np.exp(-x * np.e)) - 0.5
 
         return sigmoid(ary / thresh) * thresh
 
 
 def check_stock_trading_env():
+    """
+    Run StockTradingEnv NAS89 and check the environment.
+
+    Args:
+    """
     if_eval = True  # False
 
     env = StockEnvNAS89(if_eval=if_eval)
@@ -468,6 +574,15 @@ class YahooDownloader:
     """
 
     def __init__(self, start_date: str, end_date: str, ticker_list: list):
+        """
+        Initialize the date range
+
+        Args:
+            self: write your description
+            start_date: write your description
+            end_date: write your description
+            ticker_list: write your description
+        """
 
         self.start_date = start_date
         self.end_date = end_date
@@ -555,6 +670,16 @@ class FeatureEngineer:
             use_turbulence=False,
             user_defined_feature=False,
     ):
+        """
+        Initializes the class with the appropriate parameters.
+
+        Args:
+            self: write your description
+            use_technical_indicator: write your description
+            tech_indicator_list: write your description
+            use_turbulence: write your description
+            user_defined_feature: write your description
+        """
         self.use_technical_indicator = use_technical_indicator
         self.tech_indicator_list = tech_indicator_list
         self.use_turbulence = use_turbulence
@@ -694,6 +819,11 @@ class FeatureEngineer:
 
 
 def load_and_run_agent():
+    """
+    Run an agent and save the state and action tensors to a file.
+
+    Args:
+    """
     import matplotlib.pyplot as plt
     from tqdm import trange
 

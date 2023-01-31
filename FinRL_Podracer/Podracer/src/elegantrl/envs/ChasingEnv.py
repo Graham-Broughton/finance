@@ -12,6 +12,13 @@ TargetReturnDict = {
 
 class ChasingEnv:
     def __init__(self, dim=2):
+        """
+        Initialize the environment.
+
+        Args:
+            self: write your description
+            dim: write your description
+        """
         self.dim = dim
         self.init_distance = 8.0
 
@@ -33,6 +40,12 @@ class ChasingEnv:
         self.target_return = TargetReturnDict[dim]
 
     def reset(self):
+        """
+        Reset the state of the Gaussian process.
+
+        Args:
+            self: write your description
+        """
         self.p0 = rd.normal(0, 1, size=self.dim)
         self.v0 = np.zeros(self.dim)
 
@@ -45,6 +58,13 @@ class ChasingEnv:
         return self.get_state()
 
     def step(self, action):
+        """
+        Step the particle by one step.
+
+        Args:
+            self: write your description
+            action: write your description
+        """
         action_l2 = (action**2).sum() ** 0.5
         action_l2 = max(action_l2, 1.0)
         action = action / action_l2
@@ -72,10 +92,22 @@ class ChasingEnv:
         return next_state, reward, done, None
 
     def get_state(self):
+        """
+        Get the state of the cylinder.
+
+        Args:
+            self: write your description
+        """
         return np.hstack((self.p0, self.v0, self.p1, self.v1))
 
     @staticmethod
     def get_action(state):
+        """
+        Get the action from the given state
+
+        Args:
+            state: write your description
+        """
         states_reshape = state.reshape((4, -1))
         p0 = states_reshape[0]
         p1 = states_reshape[2]
@@ -84,6 +116,15 @@ class ChasingEnv:
 
 class ChasingVecEnv:
     def __init__(self, dim=2, env_num=32, device_id=0):
+        """
+        Initializes the environment.
+
+        Args:
+            self: write your description
+            dim: write your description
+            env_num: write your description
+            device_id: write your description
+        """
         self.dim = dim
         self.init_distance = 8.0
 
@@ -109,6 +150,12 @@ class ChasingVecEnv:
         self.device = torch.device("cpu" if device_id == -1 else f"cuda:{device_id}")
 
     def reset(self):
+        """
+        Reset the environment and return the state
+
+        Args:
+            self: write your description
+        """
         self.p0s = torch.zeros(
             (self.env_num, self.dim), dtype=torch.float32, device=self.device
         )
@@ -134,6 +181,13 @@ class ChasingVecEnv:
         return self.get_state()
 
     def reset_env_i(self, i):
+        """
+        Reset environment variables for ith step.
+
+        Args:
+            self: write your description
+            i: write your description
+        """
         self.p0s[i] = torch.normal(0, 1, size=(self.dim,))
         self.v0s[i] = torch.zeros((self.dim,))
         self.p1s[i] = torch.normal(-self.init_distance, 1, size=(self.dim,))
@@ -186,10 +240,22 @@ class ChasingVecEnv:
         return next_states, rewards, dones, None
 
     def get_state(self):
+        """
+        Get the state of the optimizer
+
+        Args:
+            self: write your description
+        """
         return torch.cat((self.p0s, self.v0s, self.p1s, self.v1s), dim=1)
 
     @staticmethod
     def get_action(states):
+        """
+        Get the action from the states.
+
+        Args:
+            states: write your description
+        """
         states_reshape = states.reshape((states.shape[0], 4, -1))
         p0s = states_reshape[:, 0]
         p1s = states_reshape[:, 2]
@@ -197,6 +263,11 @@ class ChasingVecEnv:
 
 
 def check_chasing_env():
+    """
+    Check the ChasingEnv and print the results.
+
+    Args:
+    """
     env = ChasingEnv()
 
     reward_sum = 0.0  # episode return
@@ -220,6 +291,11 @@ def check_chasing_env():
 
 
 def check_chasing_vec_env():
+    """
+    Check ChasingVecEnv for consistency.
+
+    Args:
+    """
     env = ChasingVecEnv(dim=2, env_num=2, device_id=0)
 
     reward_sums = [

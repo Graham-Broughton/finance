@@ -13,6 +13,18 @@ class CryptoEnv:  # custom env
         sell_cost_pct=1e-3,
         gamma=0.99,
     ):
+        """
+        Initializes the environment.
+
+        Args:
+            self: write your description
+            config: write your description
+            lookback: write your description
+            initial_capital: write your description
+            buy_cost_pct: write your description
+            sell_cost_pct: write your description
+            gamma: write your description
+        """
         self.lookback = lookback
         self.initial_total_asset = initial_capital
         self.initial_cash = initial_capital
@@ -47,6 +59,12 @@ class CryptoEnv:  # custom env
         self.target_return = 10
 
     def reset(self) -> np.ndarray:
+        """
+        Resets the state of the instrument to its initial state.
+
+        Args:
+            self: write your description
+        """
         self.time = self.lookback - 1
         self.current_price = self.price_array[self.time]
         self.current_tech = self.tech_array[self.time]
@@ -58,6 +76,13 @@ class CryptoEnv:  # custom env
         return state
 
     def step(self, actions) -> (np.ndarray, float, bool, None):
+        """
+        Takes one step of the simulation.
+
+        Args:
+            self: write your description
+            actions: write your description
+        """
         self.time += 1
 
         price = self.price_array[self.time]
@@ -96,6 +121,12 @@ class CryptoEnv:  # custom env
         return state, reward, done, None
 
     def get_state(self):
+        """
+        Return the state of the simulation.
+
+        Args:
+            self: write your description
+        """
         state = np.hstack((self.cash * 2**-18, self.stocks * 2**-3))
         for i in range(self.lookback):
             tech_i = self.tech_array[self.time - i]
@@ -104,9 +135,21 @@ class CryptoEnv:  # custom env
         return state
 
     def close(self):
+        """
+        Close the connection to the AMQP server.
+
+        Args:
+            self: write your description
+        """
         pass
 
     def _generate_action_normalizer(self):
+        """
+        Generate action normalizer
+
+        Args:
+            self: write your description
+        """
         action_norm_vector = []
         price_0 = self.price_array[0]
         for price in price_0:

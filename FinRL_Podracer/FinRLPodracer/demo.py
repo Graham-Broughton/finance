@@ -14,6 +14,11 @@ gym.logger.set_level(40)  # Block warning: 'WARN: Box bound precision lowered by
 
 
 def demo_custom_env_finance_rl_nas89():  # 1.7+ 2.0+
+    """
+    This demo shows how to use the StockTrading class.
+
+    Args:
+    """
     args = Arguments(if_on_policy=True)  # hyper-parameters of on-policy is different from off-policy
     args.random_seed = 19430
 

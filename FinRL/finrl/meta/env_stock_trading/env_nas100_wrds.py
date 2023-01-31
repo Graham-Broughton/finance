@@ -33,6 +33,30 @@ class StockEnvNAS100:
         if_eval=False,
         if_trade=False,
     ):
+        """
+        Load data from a directory or file.
+
+        Args:
+            self: write your description
+            cwd: write your description
+            price_ary: write your description
+            tech_ary: write your description
+            turbulence_ary: write your description
+            gamma: write your description
+            turbulence_thresh: write your description
+            min_stock_rate: write your description
+            max_stock: write your description
+            initial_capital: write your description
+            buy_cost_pct: write your description
+            sell_cost_pct: write your description
+            data_gap: write your description
+            reward_scaling: write your description
+            ticker_list: write your description
+            tech_indicator_list: write your description
+            initial_stocks: write your description
+            if_eval: write your description
+            if_trade: write your description
+        """
         self.min_stock_rate = min_stock_rate
         beg_i, mid_i, end_i = 0, int(211210), int(422420)
 
@@ -91,6 +115,12 @@ class StockEnvNAS100:
         self.episode_return = 0.0
 
     def reset(self):
+        """
+        Reset the state of the instrument to its initial state.
+
+        Args:
+            self: write your description
+        """
         self.day = 0
         price = self.price_ary[self.day]
 
@@ -108,6 +138,13 @@ class StockEnvNAS100:
         return self.get_state(price)  # state
 
     def step(self, actions):
+        """
+        Take one step of the simulation.
+
+        Args:
+            self: write your description
+            actions: write your description
+        """
         actions = (actions * self.max_stock).astype(int)
 
         self.day += 1
@@ -154,6 +191,13 @@ class StockEnvNAS100:
         return state, reward, done, dict()
 
     def get_state(self, price):
+        """
+        Get the state of the instrument at the given price.
+
+        Args:
+            self: write your description
+            price: write your description
+        """
         amount = np.array(max(self.amount, 1e4) * (2**-12), dtype=np.float32)
         scale = np.array(2**-6, dtype=np.float32)
         return np.hstack(
@@ -169,6 +213,13 @@ class StockEnvNAS100:
         )  # state.astype(np.float32)
 
     def load_data(self, cwd):
+        """
+        Load data from the data directory.
+
+        Args:
+            self: write your description
+            cwd: write your description
+        """
         data_path_price_array = f"{cwd}/price_ary.npy"
         data_path_tech_array = f"{cwd}/tech_ary.npy"
         data_path_turb_array = f"{cwd}/turb_ary.npy"
@@ -187,6 +238,13 @@ class StockEnvNAS100:
         return price_ary, tech_ary, turbulence_ary
 
     def draw_cumulative_return(self, args, _torch) -> list:
+        """
+        Draws the cumulative return.
+
+        Args:
+            self: write your description
+            _torch: write your description
+        """
         state_dim = self.state_dim
         action_dim = self.action_dim
 
@@ -231,7 +289,20 @@ class StockEnvNAS100:
 
     @staticmethod
     def sigmoid_sign(ary, thresh):
+        """
+        Sigmoid function for thresholding the signal
+
+        Args:
+            ary: write your description
+            thresh: write your description
+        """
         def sigmoid(x):
+            """
+            Sigmoid function of the sigmoid function of the distribution.
+
+            Args:
+                x: write your description
+            """
             return 1 / (1 + np.exp(-x * np.e)) - 0.5
 
         return sigmoid(ary / thresh) * thresh

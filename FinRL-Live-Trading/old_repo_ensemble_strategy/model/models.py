@@ -41,6 +41,14 @@ def train_A2C(env_train, model_name, timesteps=25000):
     return model
 
 def train_ACER(env_train, model_name, timesteps=25000):
+    """
+    Train an ACER model.
+
+    Args:
+        env_train: write your description
+        model_name: write your description
+        timesteps: write your description
+    """
     start = time.time()
     model = ACER('MlpPolicy', env_train, verbose=0)
     model.learn(total_timesteps=timesteps)
@@ -111,6 +119,20 @@ def DRL_prediction(df,
                    rebalance_window,
                    turbulence_threshold,
                    initial):
+    """
+    Predict action for each item in the trade dataframe
+
+    Args:
+        df: write your description
+        model: write your description
+        name: write your description
+        last_state: write your description
+        iter_num: write your description
+        unique_trade_date: write your description
+        rebalance_window: write your description
+        turbulence_threshold: write your description
+        initial: write your description
+    """
     ### make a prediction based on trained model###
 
     ## trading env
@@ -136,6 +158,15 @@ def DRL_prediction(df,
 
 
 def DRL_validation(model, test_data, test_env, test_obs) -> None:
+    """
+    Run DRL validation.
+
+    Args:
+        model: write your description
+        test_data: write your description
+        test_env: write your description
+        test_obs: write your description
+    """
     ###validation process###
     for i in range(len(test_data.index.unique())):
         action, _states = model.predict(test_obs)
@@ -143,6 +174,12 @@ def DRL_validation(model, test_data, test_env, test_obs) -> None:
 
 
 def get_validation_sharpe(iteration):
+    """
+    Calculates Sharpe ratio based on validation results.
+
+    Args:
+        iteration: write your description
+    """
     ###Calculate Sharpe ratio based on validation results###
     df_total_value = pd.read_csv(f'results/account_value_validation_{iteration}.csv', index_col=0)
     df_total_value.columns = ['account_value_train']

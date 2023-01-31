@@ -7,6 +7,12 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 
 def get_table(filename):
+    """
+    Reads a table from a file.
+
+    Args:
+        filename: write your description
+    """
     if os.path.isfile(filename):
         return pd.read_csv(filename, index_col='date')
     else:
@@ -14,6 +20,12 @@ def get_table(filename):
 
 
 def get_data(filename):
+    """
+    Load data from a CSV file and return it as a DataFrame.
+
+    Args:
+        filename: write your description
+    """
     df = get_table(filename)
     df['tickers'] = df['tickers'].apply(lambda x: sorted(x.split(',')))
 
@@ -29,6 +41,13 @@ def get_data(filename):
 
 
 def apply_changes(filename, df):
+    """
+    Apply changes to a dataframe.
+
+    Args:
+        filename: write your description
+        df: write your description
+    """
     changes = get_table(filename)
     # Convert ticker column from csv to list, then sort.
     changes['add'] = changes['add'].apply(lambda x: sorted(x.split(',')))
@@ -52,6 +71,13 @@ def apply_changes(filename, df):
 
 
 def get_diff(filename, df):
+    """
+    Get the difference between the last S&P500 list and the current S&P500 list
+
+    Args:
+        filename: write your description
+        df: write your description
+    """
     # compare last row to current S&P500 list
     current = pd.read_csv(filename)
     current = list(current['Symbol'])
@@ -63,6 +89,12 @@ def get_diff(filename, df):
 
 
 def save(df):
+    """
+    Save a DataFrame to a CSV file.
+
+    Args:
+        df: write your description
+    """
     now = datetime.now()
     dt_string = now.strftime('%m-%d-%Y')  # mm-dd-YYYY
     filename = f'S&P 500 Historical Components & Changes({dt_string}).csv'
@@ -70,6 +102,12 @@ def save(df):
 
 
 def main(prefix='sp500/'):
+    """
+    Main function for the script.
+
+    Args:
+        prefix: write your description
+    """
     df = get_data(prefix + 'S&P 500 Historical Components & Changes.csv')
     df = apply_changes(prefix + 'sp500_changes_since_2019.csv', df)
     df, diff = get_diff(prefix + 'sp500.csv', df)
