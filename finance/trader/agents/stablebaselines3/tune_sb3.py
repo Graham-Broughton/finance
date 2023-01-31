@@ -38,6 +38,18 @@ class LoggingCallback:
         self.cb_list = []  # Trials list for which threshold is reached
 
     def __call__(self, study: optuna.study, frozen_trial: optuna.Trial):
+        """
+        Checking if the trial is feasible
+
+        Args:
+            self: write your description
+            study: write your description
+            optuna: write your description
+            study: write your description
+            frozen_trial: write your description
+            optuna: write your description
+            Trial: write your description
+        """
         # Setting the best value in the current trial
         study.set_user_attr("previous_best_value", study.best_value)
 
@@ -94,6 +106,18 @@ class TuneSB3Optuna:
         total_timesteps: int = 50000,
         n_trials: int = 30,
     ):
+        """
+        Initializes the DRL agent.
+
+        Args:
+            self: write your description
+            env_train: write your description
+            model_name: write your description
+            env_trade: write your description
+            logging_callback: write your description
+            total_timesteps: write your description
+            n_trials: write your description
+        """
 
         self.env_train = env_train
         self.agent = DRLAgent(env=env_train)
@@ -114,6 +138,15 @@ class TuneSB3Optuna:
         )
 
     def default_sample_hyperparameters(self, trial: optuna.Trial):
+        """
+        Default sample hyperparameters.
+
+        Args:
+            self: write your description
+            trial: write your description
+            optuna: write your description
+            Trial: write your description
+        """
         if self.model_name == "a2c":
             return hpt.sample_a2c_params(trial)
         elif self.model_name == "ddpg":
@@ -126,6 +159,15 @@ class TuneSB3Optuna:
             return hpt.sample_ppo_params(trial)
 
     def calculate_sharpe(self, df: pd.DataFrame):
+        """
+        Calculate sharpe of the dataframe.
+
+        Args:
+            self: write your description
+            df: write your description
+            pd: write your description
+            DataFrame: write your description
+        """
         df["daily_return"] = df["account_value"].pct_change(1)
         if df["daily_return"].std() != 0:
             sharpe = (252**0.5) * df["daily_return"].mean() / df["daily_return"].std()
@@ -134,6 +176,15 @@ class TuneSB3Optuna:
             return 0
 
     def objective(self, trial: optuna.Trial):
+        """
+        Run DRL agent on trial and return sharpe
+
+        Args:
+            self: write your description
+            trial: write your description
+            optuna: write your description
+            Trial: write your description
+        """
         hyperparameters = self.default_sample_hyperparameters(trial)
         policy_kwargs = hyperparameters["policy_kwargs"]
         del hyperparameters["policy_kwargs"]
@@ -156,6 +207,12 @@ class TuneSB3Optuna:
         return sharpe
 
     def run_optuna(self):
+        """
+        Run the TPE model on optuna.
+
+        Args:
+            self: write your description
+        """
         sampler = optuna.samplers.TPESampler(seed=42)
         study = optuna.create_study(
             study_name=f"{self.model_name}_study",
@@ -177,6 +234,15 @@ class TuneSB3Optuna:
     def backtest(
         self, final_study: optuna.Study
     ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+        """
+        Run backtest and return results.
+
+        Args:
+            self: write your description
+            final_study: write your description
+            optuna: write your description
+            Study: write your description
+        """
         print("Hyperparameters after tuning", final_study.best_params)
         print("Best Trial", final_study.best_trial)
 

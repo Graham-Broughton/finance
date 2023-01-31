@@ -21,6 +21,21 @@ def test(
     if_vix=True,
     **kwargs,
 ):
+    """
+    Run elegantrl test.
+
+    Args:
+        start_date: write your description
+        end_date: write your description
+        ticker_list: write your description
+        data_source: write your description
+        time_interval: write your description
+        technical_indicator_list: write your description
+        drl_lib: write your description
+        env: write your description
+        model_name: write your description
+        if_vix: write your description
+    """
 
     # import data processor
     from finrl.meta.data_processor import DataProcessor

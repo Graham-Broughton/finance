@@ -20,6 +20,23 @@ class StockTradingEnv(gym.Env):
         reward_scaling=2**-11,
         initial_stocks=None,
     ):
+        """
+        Initializes the portfolio.
+
+        Args:
+            self: write your description
+            config: write your description
+            initial_account: write your description
+            gamma: write your description
+            turbulence_thresh: write your description
+            min_stock_rate: write your description
+            max_stock: write your description
+            initial_capital: write your description
+            buy_cost_pct: write your description
+            sell_cost_pct: write your description
+            reward_scaling: write your description
+            initial_stocks: write your description
+        """
         price_ary = config["price_array"]
         tech_ary = config["tech_array"]
         turbulence_ary = config["turbulence_array"]
@@ -78,6 +95,12 @@ class StockTradingEnv(gym.Env):
         )
 
     def reset(self):
+        """
+        Reset the state of the instrument to its initial state.
+
+        Args:
+            self: write your description
+        """
         self.day = 0
         price = self.price_ary[self.day]
 
@@ -101,6 +124,13 @@ class StockTradingEnv(gym.Env):
         return self.get_state(price)  # state
 
     def step(self, actions):
+        """
+        Take one step of the simulation.
+
+        Args:
+            self: write your description
+            actions: write your description
+        """
         actions = (actions * self.max_stock).astype(int)
 
         self.day += 1
@@ -147,6 +177,13 @@ class StockTradingEnv(gym.Env):
         return state, reward, done, dict()
 
     def get_state(self, price):
+        """
+        Get the state of the market at the given price.
+
+        Args:
+            self: write your description
+            price: write your description
+        """
         amount = np.array(self.amount * (2**-12), dtype=np.float32)
         scale = np.array(2**-6, dtype=np.float32)
         return np.hstack(
@@ -163,7 +200,20 @@ class StockTradingEnv(gym.Env):
 
     @staticmethod
     def sigmoid_sign(ary, thresh):
+        """
+        Sigmoid function for thresholding the signal
+
+        Args:
+            ary: write your description
+            thresh: write your description
+        """
         def sigmoid(x):
+            """
+            Sigmoid function of the sigmoid function of the distribution.
+
+            Args:
+                x: write your description
+            """
             return 1 / (1 + np.exp(-x * np.e)) - 0.5
 
         return sigmoid(ary / thresh) * thresh

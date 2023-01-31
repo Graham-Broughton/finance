@@ -14,6 +14,13 @@ from finrl.meta.preprocessor.yahoodownloader import YahooDownloader
 
 
 def get_daily_return(df, value_col_name="account_value"):
+    """
+    Returns daily return from a pandas DataFrame.
+
+    Args:
+        df: write your description
+        value_col_name: write your description
+    """
     df = deepcopy(df)
     df["daily_return"] = df[value_col_name].pct_change(1)
     df["date"] = pd.to_datetime(df["date"])
@@ -23,6 +30,12 @@ def get_daily_return(df, value_col_name="account_value"):
 
 
 def convert_daily_return_to_pyfolio_ts(df):
+    """
+    Convert a daily return DataFrame to a pyfolio timeseries
+
+    Args:
+        df: write your description
+    """
     strategy_ret = df.copy()
     strategy_ret["date"] = pd.to_datetime(strategy_ret["date"])
     strategy_ret.set_index("date", drop=False, inplace=True)
@@ -32,6 +45,13 @@ def convert_daily_return_to_pyfolio_ts(df):
 
 
 def backtest_stats(account_value, value_col_name="account_value"):
+    """
+    Calculates the performance stats for the backtest portfolio.
+
+    Args:
+        account_value: write your description
+        value_col_name: write your description
+    """
     dr_test = get_daily_return(account_value, value_col_name=value_col_name)
     perf_stats_all = timeseries.perf_stats(
         returns=dr_test,
@@ -50,6 +70,20 @@ def backtest_plot(
     baseline_ticker="^DJI",
     value_col_name="account_value",
 ):
+    """
+    Plots a backtest portfolio.
+
+    Args:
+        account_value: write your description
+        baseline_start: write your description
+        config: write your description
+        TRADE_START_DATE: write your description
+        baseline_end: write your description
+        config: write your description
+        TRADE_END_DATE: write your description
+        baseline_ticker: write your description
+        value_col_name: write your description
+    """
     df = deepcopy(account_value)
     df["date"] = pd.to_datetime(df["date"])
     test_returns = get_daily_return(df, value_col_name=value_col_name)
@@ -70,12 +104,28 @@ def backtest_plot(
 
 
 def get_baseline(ticker, start, end):
+    """
+    Get baseline data from Yahoo Finance.
+
+    Args:
+        ticker: write your description
+        start: write your description
+        end: write your description
+    """
     return YahooDownloader(
         start_date=start, end_date=end, ticker_list=[ticker]
     ).fetch_data()
 
 
 def trx_plot(df_trade, df_actions, ticker_list):
+    """
+    Plots trading signal and actions in TRX format.
+
+    Args:
+        df_trade: write your description
+        df_actions: write your description
+        ticker_list: write your description
+    """
     df_trx = pd.DataFrame(np.array(df_actions["transactions"].to_list()))
     df_trx.columns = ticker_list
     df_trx.index = df_actions["date"]

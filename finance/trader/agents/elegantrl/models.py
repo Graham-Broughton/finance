@@ -43,12 +43,30 @@ class DRLAgent:
     """
 
     def __init__(self, env, price_array, tech_array, turbulence_array):
+        """
+        Initialize the internal data structures.
+
+        Args:
+            self: write your description
+            env: write your description
+            price_array: write your description
+            tech_array: write your description
+            turbulence_array: write your description
+        """
         self.env = env
         self.price_array = price_array
         self.tech_array = tech_array
         self.turbulence_array = turbulence_array
 
     def get_model(self, model_name, model_kwargs):
+        """
+        Returns the model for the given model_name.
+
+        Args:
+            self: write your description
+            model_name: write your description
+            model_kwargs: write your description
+        """
         env_config = {
             "price_array": self.price_array,
             "tech_array": self.tech_array,
@@ -79,12 +97,30 @@ class DRLAgent:
         return model
 
     def train_model(self, model, cwd, total_timesteps=5000):
+        """
+        Train a model and evaluate it.
+
+        Args:
+            self: write your description
+            model: write your description
+            cwd: write your description
+            total_timesteps: write your description
+        """
         model.cwd = cwd
         model.break_step = total_timesteps
         train_and_evaluate(model)
 
     @staticmethod
     def DRL_prediction(model_name, cwd, net_dimension, environment):
+        """
+        Predicts the assets of a model using the DRL model.
+
+        Args:
+            model_name: write your description
+            cwd: write your description
+            net_dimension: write your description
+            environment: write your description
+        """
         if model_name not in MODELS:
             raise NotImplementedError("NotImplementedError")
         agent = MODELS[model_name]

@@ -35,9 +35,22 @@ class TensorboardCallback(BaseCallback):
     """
 
     def __init__(self, verbose=0):
+        """
+        Initialize the class with the given verbosity.
+
+        Args:
+            self: write your description
+            verbose: write your description
+        """
         super().__init__(verbose)
 
     def _on_step(self) -> bool:
+        """
+        Log the step and return True if it was successful.
+
+        Args:
+            self: write your description
+        """
         try:
             self.logger.record(key="train/reward", value=self.locals["rewards"][0])
         except BaseException:
@@ -65,6 +78,13 @@ class DRLAgent:
     """
 
     def __init__(self, env):
+        """
+        Initializes the ScopedEnvironment instance with the given environment.
+
+        Args:
+            self: write your description
+            env: write your description
+        """
         self.env = env
 
     def get_model(
@@ -77,6 +97,19 @@ class DRLAgent:
         seed=None,
         tensorboard_log=None,
     ):
+        """
+        Returns a TensorFlow model for the given policy.
+
+        Args:
+            self: write your description
+            model_name: write your description
+            policy: write your description
+            policy_kwargs: write your description
+            model_kwargs: write your description
+            verbose: write your description
+            seed: write your description
+            tensorboard_log: write your description
+        """
         if model_name not in MODELS:
             raise NotImplementedError("NotImplementedError")
 
@@ -100,6 +133,15 @@ class DRLAgent:
         )
 
     def train_model(self, model, tb_log_name, total_timesteps=5000):
+        """
+        Train a model.
+
+        Args:
+            self: write your description
+            model: write your description
+            tb_log_name: write your description
+            total_timesteps: write your description
+        """
         model = model.learn(
             total_timesteps=total_timesteps,
             tb_log_name=tb_log_name,
@@ -109,6 +151,14 @@ class DRLAgent:
 
     @staticmethod
     def DRL_prediction(model, environment, deterministic=True):
+        """
+        Predicts the reward and action memory of the model.
+
+        Args:
+            model: write your description
+            environment: write your description
+            deterministic: write your description
+        """
         test_env, test_obs = environment.get_sb_env()
         """make a prediction"""
         account_memory = []
@@ -131,6 +181,15 @@ class DRLAgent:
 
     @staticmethod
     def DRL_prediction_load_from_file(model_name, environment, cwd, deterministic=True):
+        """
+        Run a DRL model on a state and a file.
+
+        Args:
+            model_name: write your description
+            environment: write your description
+            cwd: write your description
+            deterministic: write your description
+        """
         if model_name not in MODELS:
             raise NotImplementedError("NotImplementedError")
         try:
@@ -173,6 +232,18 @@ class DRLEnsembleAgent:
         seed=None,
         verbose=1,
     ):
+        """
+        Return a TensorBoardModel instance for the given model_name.
+
+        Args:
+            model_name: write your description
+            env: write your description
+            policy: write your description
+            policy_kwargs: write your description
+            model_kwargs: write your description
+            seed: write your description
+            verbose: write your description
+        """
 
         if model_name not in MODELS:
             raise NotImplementedError("NotImplementedError")
@@ -200,6 +271,16 @@ class DRLEnsembleAgent:
 
     @staticmethod
     def train_model(model, model_name, tb_log_name, iter_num, total_timesteps=5000):
+        """
+        Train a model.
+
+        Args:
+            model: write your description
+            model_name: write your description
+            tb_log_name: write your description
+            iter_num: write your description
+            total_timesteps: write your description
+        """
         model = model.learn(
             total_timesteps=total_timesteps,
             tb_log_name=tb_log_name,
@@ -247,6 +328,27 @@ class DRLEnsembleAgent:
         tech_indicator_list,
         print_verbosity,
     ):
+        """
+        Initialize a MarketDataFrame.
+
+        Args:
+            self: write your description
+            df: write your description
+            train_period: write your description
+            val_test_period: write your description
+            rebalance_window: write your description
+            validation_window: write your description
+            stock_dim: write your description
+            hmax: write your description
+            initial_amount: write your description
+            buy_cost_pct: write your description
+            sell_cost_pct: write your description
+            reward_scaling: write your description
+            state_space: write your description
+            action_space: write your description
+            tech_indicator_list: write your description
+            print_verbosity: write your description
+        """
 
         self.df = df
         self.train_period = train_period
