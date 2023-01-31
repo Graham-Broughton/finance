@@ -4,6 +4,7 @@ import time
 
 import alpaca_trade_api as tradeapi
 import gym
+import ib_insync as ib
 import numpy as np
 import pandas as pd
 import torch
