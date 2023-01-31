@@ -14,6 +14,17 @@ Array = np.ndarray
 
 class ReplayBuffer:  # for off-policy
     def __init__(self, max_capacity: int, state_dim: int, action_dim: int, gpu_id=0, if_use_per=False):
+        """
+        Initializes the buffer.
+
+        Args:
+            self: write your description
+            max_capacity: write your description
+            state_dim: write your description
+            action_dim: write your description
+            gpu_id: write your description
+            if_use_per: write your description
+        """
         self.prev_p = 0  # previous pointer
         self.next_p = 0  # next pointer
         self.if_full = False
@@ -37,6 +48,13 @@ class ReplayBuffer:  # for off-policy
             self.sample_batch = self.sample_batch_per
 
     def update_buffer(self, traj_list: List[List]):
+        """
+        Update the internal buffer with the given trajectories
+
+        Args:
+            self: write your description
+            traj_list: write your description
+        """
         traj_items = list(map(list, zip(*traj_list)))
 
         states, rewards, masks, actions = (torch.cat(item, dim=0) for item in traj_items)
@@ -72,6 +90,13 @@ class ReplayBuffer:  # for off-policy
         return steps, r_exp
 
     def sample_batch(self, batch_size: int) -> (Tensor, Tensor, Tensor, Tensor):
+        """
+        Samples a batch of data from the buffer.
+
+        Args:
+            self: write your description
+            batch_size: write your description
+        """
         indices = torch.randint(self.cur_capacity - 1, size=(batch_size,), device=self.device)
 
         '''replace indices using the latest sample'''
@@ -90,6 +115,13 @@ class ReplayBuffer:  # for off-policy
         )
 
     def sample_batch_per(self, batch_size: int) -> (Tensor, Tensor, Tensor, Tensor, Tensor):
+        """
+        Samples a batch of batch_size mini - batches from the buffer.
+
+        Args:
+            self: write your description
+            batch_size: write your description
+        """
         beg = -self.max_capacity
         end = (self.cur_capacity - self.max_capacity) if (self.cur_capacity < self.max_capacity) else None
 
@@ -105,9 +137,24 @@ class ReplayBuffer:  # for off-policy
         )
 
     def td_error_update(self, td_error: Tensor):
+        """
+        Updates the td_error of the current tree with the given tensor.
+
+        Args:
+            self: write your description
+            td_error: write your description
+        """
         self.per_tree.td_error_update(td_error)
 
     def save_or_load_history(self, cwd: str, if_save: bool):
+        """
+        Save or load history.
+
+        Args:
+            self: write your description
+            cwd: write your description
+            if_save: write your description
+        """
         obj_names = (
             (self.buf_reward, "reward"),
             (self.buf_mask, "mask"),
@@ -142,6 +189,19 @@ class ReplayBuffer:  # for off-policy
     def get_state_norm(self, cwd: str = '.',
                        state_avg: [float, Tensor] = 0.0,
                        state_std: [float, Tensor] = 1.0):
+        """
+        Calculates the state norm and average state norm.
+
+        Args:
+            self: write your description
+            cwd: write your description
+            state_avg: write your description
+            float: write your description
+            Tensor: write your description
+            state_std: write your description
+            float: write your description
+            Tensor: write your description
+        """
         try:
             torch.save(state_avg, f"{cwd}/env_state_avg.pt")
             torch.save(state_std, f"{cwd}/env_state_std.pt")
@@ -161,6 +221,12 @@ class ReplayBuffer:  # for off-policy
         print(f"| {self.__class__.__name__}: \nstate_std = {state_std}")
 
     def concatenate_state(self) -> Tensor:
+        """
+        Concatenates the state of the buffer with the previous state.
+
+        Args:
+            self: write your description
+        """
         if self.prev_p <= self.next_p:
             buf_state = self.buf_state[self.prev_p:self.next_p]
         else:
@@ -169,6 +235,12 @@ class ReplayBuffer:  # for off-policy
         return buf_state
 
     def concatenate_buffer(self) -> (Tensor, Tensor, Tensor, Tensor):
+        """
+        Concatenates the buffer states actions reward and mask.
+
+        Args:
+            self: write your description
+        """
         if self.prev_p <= self.next_p:
             buf_state = self.buf_state[self.prev_p:self.next_p]
             buf_action = self.buf_action[self.prev_p:self.next_p]
@@ -185,9 +257,22 @@ class ReplayBuffer:  # for off-policy
 
 class ReplayBufferList(list):  # for on-policy
     def __init__(self):
+        """
+        Initialize the list.
+
+        Args:
+            self: write your description
+        """
         list.__init__(self)  # (buf_state, buf_reward, buf_mask, buf_action, buf_noise) = self[:]
 
     def update_buffer(self, traj_list: List[List]) -> (int, float):
+        """
+        Update the buffer with the given trajectories
+
+        Args:
+            self: write your description
+            traj_list: write your description
+        """
         cur_items = list(map(list, zip(*traj_list)))
         self[:] = [torch.cat(item, dim=0) for item in cur_items]
 
@@ -198,6 +283,15 @@ class ReplayBufferList(list):  # for on-policy
     def get_state_norm(self, cwd='.',
                        state_avg: Union[Tensor, float] = 0.0,
                        state_std: [Tensor, float] = 1.0):
+        """
+        Calculates the state norm and average and standard deviation.
+
+        Args:
+            self: write your description
+            cwd: write your description
+            state_avg: write your description
+            state_std: write your description
+        """
         try:
             torch.save(state_avg, f"{cwd}/env_state_avg.pt")
             torch.save(state_std, f"{cwd}/env_state_std.pt")
@@ -227,6 +321,13 @@ class BinarySearchTree:
     """
 
     def __init__(self, max_capacity: int):
+        """
+        Initializes the replay buffer.
+
+        Args:
+            self: write your description
+            max_capacity: write your description
+        """
         self.max_capacity = max_capacity  # replay buffer len
         self.prob_ary = np.zeros((max_capacity - 1) + max_capacity)  # parent_nodes_num + leaf_nodes_num
         self.max_len = len(self.prob_ary)
@@ -241,6 +342,14 @@ class BinarySearchTree:
         self.per_beta = 0.4  # beta = (PER:0, NotPER:1)
 
     def update_id(self, data_id: int, prob=10):  # 10 is max_prob
+        """
+        Updates the tree with the given data id and the given probability.
+
+        Args:
+            self: write your description
+            data_id: write your description
+            prob: write your description
+        """
         tree_id = data_id + self.max_capacity - 1
         if self.now_len == tree_id:
             self.now_len += 1
@@ -253,6 +362,14 @@ class BinarySearchTree:
             self.prob_ary[tree_id] += delta
 
     def update_ids(self, data_ids: Array, prob=10):  # 10 is max_prob
+        """
+        Updates the prob_ary for the given ids.
+
+        Args:
+            self: write your description
+            data_ids: write your description
+            prob: write your description
+        """
         ids = data_ids + self.max_capacity - 1
         self.now_len += (ids >= self.now_len).sum()
 
@@ -296,6 +413,15 @@ class BinarySearchTree:
         return min(leaf_idx, self.now_len - 2)  # leaf_idx
 
     def get_indices_is_weights(self, batch_size: int, beg: int, end: int) -> (Array, Array):
+        """
+        Sample indices with proportional prioritization and weights for is_weights
+
+        Args:
+            self: write your description
+            batch_size: write your description
+            beg: write your description
+            end: write your description
+        """
         self.per_beta = min(1., self.per_beta + 0.001)
 
         # get random values for searching indices with proportional prioritization
@@ -310,6 +436,13 @@ class BinarySearchTree:
         return self.indices, is_weights
 
     def td_error_update(self, td_error: Tensor):  # td_error = (q-q).detach_().abs()
+        """
+        Updates the indices with the given td_error.
+
+        Args:
+            self: write your description
+            td_error: write your description
+        """
         prob = td_error.squeeze().clip(1e-6, 10).pow(self.per_alpha)
         prob = prob.cpu().numpy()
         self.update_ids(self.indices, prob)
@@ -320,6 +453,17 @@ def get_state_avg_std(
         state_avg: [Tensor, float] = 0.0,
         state_std: [Tensor, float] = 1.0,
 ) -> (Tensor, Tensor):
+    """
+    Calculates the state average and standard deviation.
+
+    Args:
+        buf_state: write your description
+        batch_size: write your description
+        state_avg: write your description
+        float: write your description
+        state_std: write your description
+        float: write your description
+    """
     state_len = buf_state.shape[0]
     state_avg_temp = torch.zeros_like(buf_state[0])
     state_std_temp = torch.zeros_like(buf_state[0])

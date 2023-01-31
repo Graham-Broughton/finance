@@ -26,6 +26,16 @@ class AgentTD3(AgentBase):
     """
 
     def __init__(self, net_dim: int, state_dim: int, action_dim: int, gpu_id: int = 0, args: Arguments = None):
+        """
+        Initialize the class attributes.
+
+        Args:
+            self: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            gpu_id: write your description
+        """
         self.if_off_policy = True
         self.act_class = getattr(self, 'act_class', Actor)
         self.cri_class = getattr(self, 'cri_class', CriticTwin)
@@ -38,6 +48,13 @@ class AgentTD3(AgentBase):
         self.update_freq = 2  # delay update frequency
 
     def update_net(self, buffer: ReplayBuffer) -> tuple:
+        """
+        Update the net.
+
+        Args:
+            self: write your description
+            buffer: write your description
+        """
         obj_critic = torch.zeros(1)
         obj_actor = torch.zeros(1)
         update_times = int(1 + buffer.max_capacity * self.repeat_times / self.batch_size)

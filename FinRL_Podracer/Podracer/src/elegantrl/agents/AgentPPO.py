@@ -23,6 +23,16 @@ class AgentPPO(AgentBase):
     """
 
     def __init__(self, net_dim: int, state_dim: int, action_dim: int, gpu_id: int = 0, args: Arguments = None):
+        """
+        Initializes the Agent.
+
+        Args:
+            self: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            gpu_id: write your description
+        """
         self.if_off_policy = False
         self.act_class = getattr(self, 'act_class', ActorPPO)
         self.cri_class = getattr(self, 'cri_class', CriticPPO)
@@ -41,6 +51,14 @@ class AgentPPO(AgentBase):
         self.act_update_gap = getattr(args, 'act_update_gap', 1)
 
     def explore_one_env(self, env, target_step: int) -> list:
+        """
+        Runs the environment until the target step is reached.
+
+        Args:
+            self: write your description
+            env: write your description
+            target_step: write your description
+        """
         traj_list = list()
         last_dones = [0, ]
         state = self.states[0]
@@ -63,6 +81,14 @@ class AgentPPO(AgentBase):
         return self.convert_trajectory(traj_list, last_dones)  # traj_list
 
     def explore_vec_env(self, env, target_step: int) -> list:
+        """
+        Traverses the environment and explores the given vector environment for a specified target step.
+
+        Args:
+            self: write your description
+            env: write your description
+            target_step: write your description
+        """
         traj_list = list()
         last_dones = torch.zeros(self.env_num, dtype=torch.int, device=self.device)
         states = self.states if self.if_use_old_traj else env.reset()
@@ -184,6 +210,12 @@ class AgentPPO(AgentBase):
         return buf_r_sum, buf_adv_v
 
     def fix_noise_in_old_traj(self):
+        """
+        Remove noise in old trajectories.
+
+        Args:
+            self: write your description
+        """
         # states, rewards, masks, actions, noises
         batch_size = 2 ** 10  # set a smaller 'batch_size' when out of GPU memory.
         for i in range(self.env_num):
@@ -200,6 +232,16 @@ class AgentPPO(AgentBase):
 
 class AgentDiscretePPO(AgentPPO):
     def __init__(self, net_dim: int, state_dim: int, action_dim: int, gpu_id: int = 0, args: Arguments = None):
+        """
+        Initialize the PPO.
+
+        Args:
+            self: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            gpu_id: write your description
+        """
         self.act_class = getattr(self, 'act_class', ActorDiscretePPO)
         self.cri_class = getattr(self, 'cri_class', CriticPPO)
         super().__init__(net_dim, state_dim, action_dim, gpu_id, args)
@@ -207,6 +249,16 @@ class AgentDiscretePPO(AgentPPO):
 
 class AgentPPOHtermK(AgentPPO):
     def __init__(self, net_dim: int, state_dim: int, action_dim: int, gpu_id: int = 0, args: Arguments = None):
+        """
+        Initializes the instance of AgentPPO.
+
+        Args:
+            self: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            gpu_id: write your description
+        """
         AgentPPO.__init__(self, net_dim, state_dim, action_dim, gpu_id, args)
 
     def update_net(self, buffer: ReplayBufferList):
@@ -263,6 +315,16 @@ class AgentPPOHtermK(AgentPPO):
 
 class AgentPPOHtermKV2(AgentPPO):
     def __init__(self, net_dim: int, state_dim: int, action_dim: int, gpu_id: int = 0, args: Arguments = None):
+        """
+        Initializes the instance of AgentPPO.
+
+        Args:
+            self: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            gpu_id: write your description
+        """
         AgentPPO.__init__(self, net_dim, state_dim, action_dim, gpu_id, args)
 
     def update_net(self, buffer: ReplayBufferList):
@@ -322,6 +384,17 @@ class AgentPPOHtermKV2(AgentPPO):
     def get_buf_h_term_k_v2(
             self, buf_state: Tensor, buf_action: Tensor, buf_mask: Tensor, buf_reward: Tensor, buf_r_sum: Tensor,
     ):
+        """
+        Computes the K - v2 term for the given buffer of states actions mask and r sum
+
+        Args:
+            self: write your description
+            buf_state: write your description
+            buf_action: write your description
+            buf_mask: write your description
+            buf_reward: write your description
+            buf_r_sum: write your description
+        """
         buf_dones = torch.where(buf_mask == 0)[0].detach().cpu() + 1
         i = 0
         for j in buf_dones:
@@ -407,11 +480,31 @@ class AgentPPOHtermKV2(AgentPPO):
 
 class AgentPPOgetObjHterm(AgentPPO):
     def __init__(self, net_dim: int, state_dim: int, action_dim: int, gpu_id: int = 0, args: Arguments = None):
+        """
+        Initializes the instance of AgentPPO.
+
+        Args:
+            self: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            gpu_id: write your description
+        """
         AgentPPO.__init__(self, net_dim, state_dim, action_dim, gpu_id, args)
 
     def get_buf_h_term_k(
             self, buf_state: Tensor, buf_action: Tensor, buf_mask: Tensor, buf_reward: Tensor
     ):
+        """
+        Calculates the h_term buffer for the buffer of the buffer_h_term.
+
+        Args:
+            self: write your description
+            buf_state: write your description
+            buf_action: write your description
+            buf_mask: write your description
+            buf_reward: write your description
+        """
         buf_dones = torch.where(buf_mask == 0)[0].detach().cpu() + 1
         i = 0
         for j in buf_dones:
@@ -445,6 +538,12 @@ class AgentPPOgetObjHterm(AgentPPO):
         self.ten_reward = torch.vstack([item[2].to(torch.float32) for item in self.h_term_buffer]).squeeze(1)
 
     def get_obj_h_term_k(self) -> Tensor:
+        """
+        Returns a random hamiltonian for the h - term.
+
+        Args:
+            self: write your description
+        """
         # '''rd sample'''
         k0 = self.h_term_k_step
         h_term_batch_size = self.batch_size // k0
@@ -476,6 +575,13 @@ class AgentPPOgetObjHterm(AgentPPO):
         return obj_hamilton
 
     def update_net(self, buffer: ReplayBufferList):
+        """
+        Update the network with a given buffer.
+
+        Args:
+            self: write your description
+            buffer: write your description
+        """
         with torch.no_grad():
             buf_state, buf_reward, buf_mask, buf_action, buf_noise = (ten.to(self.device) for ten in buffer)
             # buf_len = buf_state.shape[0]

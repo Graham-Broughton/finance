@@ -25,6 +25,16 @@ class AgentSAC(AgentBase):  # [ElegantRL.2022.03.03]
     """
 
     def __init__(self, net_dim: int, state_dim: int, action_dim: int, gpu_id: int = 0, args: Arguments = None):
+        """
+        Initialize the Network object.
+
+        Args:
+            self: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            gpu_id: write your description
+        """
         self.if_off_policy = True
         self.act_class = getattr(self, 'act_class', ActorSAC)
         self.cri_class = getattr(self, 'cri_class', CriticTwin)
@@ -68,6 +78,14 @@ class AgentSAC(AgentBase):  # [ElegantRL.2022.03.03]
         return obj_critic.item(), -obj_actor.item(), self.alpha_log.exp().detach().item()
 
     def get_obj_critic_raw(self, buffer: ReplayBuffer, batch_size: int) -> (Tensor, Tensor):
+        """
+        Sample the next batch and return the objective and state.
+
+        Args:
+            self: write your description
+            buffer: write your description
+            batch_size: write your description
+        """
         with torch.no_grad():
             reward, mask, action, state, next_s = buffer.sample_batch(batch_size)
 
@@ -81,6 +99,14 @@ class AgentSAC(AgentBase):  # [ElegantRL.2022.03.03]
         return obj_critic, state
 
     def get_obj_critic_per(self, buffer: ReplayBuffer, batch_size: int) -> (Tensor, Tensor):
+        """
+        Sample batch and return objective and state.
+
+        Args:
+            self: write your description
+            buffer: write your description
+            batch_size: write your description
+        """
         with torch.no_grad():
             reward, mask, action, state, next_s, is_weights = buffer.sample_batch(batch_size)
 
@@ -99,6 +125,16 @@ class AgentSAC(AgentBase):  # [ElegantRL.2022.03.03]
 
 class AgentReSAC(AgentSAC):  # Using TTUR (Two Time-scale Update Rule) for reliable_lambda
     def __init__(self, net_dim: int, state_dim: int, action_dim: int, gpu_id: int = 0, args: Arguments = None):
+        """
+        Initialize the class.
+
+        Args:
+            self: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            gpu_id: write your description
+        """
         self.act_class = getattr(self, 'act_class', ActorFixSAC)
         self.cri_class = getattr(self, 'cri_class', CriticTwin)
         args.if_act_target = getattr(args, 'if_act_target', True)
@@ -159,6 +195,16 @@ class AgentReSAC(AgentSAC):  # Using TTUR (Two Time-scale Update Rule) for relia
 
 class AgentReSACHterm(AgentSAC):  # Using TTUR (Two Time-scale Update Rule) for reliable_lambda
     def __init__(self, net_dim: int, state_dim: int, action_dim: int, gpu_id: int = 0, args: Arguments = None):
+        """
+        Initialize the class.
+
+        Args:
+            self: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            gpu_id: write your description
+        """
         self.act_class = getattr(self, 'act_class', ActorFixSAC)
         self.cri_class = getattr(self, 'cri_class', CriticTwin)
         args.if_act_target = getattr(args, 'if_act_target', True)
@@ -217,6 +263,16 @@ class AgentReSACHterm(AgentSAC):  # Using TTUR (Two Time-scale Update Rule) for 
 
 class AgentReSACHtermK(AgentSAC):  # Using TTUR (Two Time-scale Update Rule) for reliable_lambda
     def __init__(self, net_dim: int, state_dim: int, action_dim: int, gpu_id: int = 0, args: Arguments = None):
+        """
+        Initialize the class.
+
+        Args:
+            self: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            gpu_id: write your description
+        """
         self.act_class = getattr(self, 'act_class', ActorFixSAC)
         self.cri_class = getattr(self, 'cri_class', CriticTwin)
         args.if_act_target = getattr(args, 'if_act_target', True)
@@ -279,12 +335,30 @@ class AgentReSACHtermK(AgentSAC):  # Using TTUR (Two Time-scale Update Rule) for
 
 class AgentREDqSAC(AgentSAC):  # Modified SAC using reliable_lambda and TTUR (Two Time-scale Update Rule)
     def __init__(self, net_dim: int, state_dim: int, action_dim: int, gpu_id: int = 0, args: Arguments = None):
+        """
+        Initialize the class.
+
+        Args:
+            self: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            gpu_id: write your description
+        """
         self.act_class = getattr(self, 'act_class', ActorFixSAC)
         self.cri_class = getattr(self, 'cri_class', CriticREDq)
         super().__init__(net_dim, state_dim, action_dim, gpu_id, args)
         self.obj_c = (-np.log(0.5)) ** 0.5  # for reliable_lambda
 
     def get_obj_critic_raw(self, buffer: ReplayBuffer, batch_size: int) -> (Tensor, Tensor):
+        """
+        Sample the next batch and return the objective and state.
+
+        Args:
+            self: write your description
+            buffer: write your description
+            batch_size: write your description
+        """
         with torch.no_grad():
             reward, mask, action, state, next_s = buffer.sample_batch(batch_size)
 
@@ -298,6 +372,14 @@ class AgentREDqSAC(AgentSAC):  # Modified SAC using reliable_lambda and TTUR (Tw
         return obj_critic, state
 
     def get_obj_critic_per(self, buffer: ReplayBuffer, batch_size: int) -> (Tensor, Tensor):
+        """
+        Sample a batch of actions and return the objective and state.
+
+        Args:
+            self: write your description
+            buffer: write your description
+            batch_size: write your description
+        """
         with torch.no_grad():
             reward, mask, action, state, next_s, is_weights = buffer.sample_batch(batch_size)
 

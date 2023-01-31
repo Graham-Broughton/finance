@@ -2141,6 +2141,14 @@ ID     Step    maxR |    avgR   stdR   avgS  stdS |    expR   objC   etc.
 
 
 def demo_ddpg_h_term(gpu_id, drl_id, env_id):  # 2022.04.04
+    """
+    Example demonstrating how to use the DPG and H - Term models.
+
+    Args:
+        gpu_id: write your description
+        drl_id: write your description
+        env_id: write your description
+    """
     env_name = ['Pendulum-v1',
                 'BipedalWalker-v3',
                 'Hopper-v2',

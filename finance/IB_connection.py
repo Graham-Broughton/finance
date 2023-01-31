@@ -2,6 +2,12 @@ import json
 
 import websocket
 
+"""
+Respond to the opening of a websocket connection.
+
+Args:
+    ws: write your description
+"""
 def on_open(ws):
 
 

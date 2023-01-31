@@ -13,12 +13,36 @@ from func import remove_all_files
 
 class JoinQuantEngineer:
     def __init__(self):
+        """
+        Initialize the class with the default values.
+
+        Args:
+            self: write your description
+        """
         pass
 
     def auth(self, username, password):
+        """
+        Authenticate to JQuery server.
+
+        Args:
+            self: write your description
+            username: write your description
+            password: write your description
+        """
         jq.auth(username, password)
 
     def data_fetch(self, stock_list, num, unit, end_dt):
+        """
+        Fetch data from JQ
+
+        Args:
+            self: write your description
+            stock_list: write your description
+            num: write your description
+            unit: write your description
+            end_dt: write your description
+        """
         df = jq.get_bars(
             security=stock_list,
             count=num,
@@ -29,6 +53,13 @@ class JoinQuantEngineer:
         return df
 
     def preprocess(df, stock_list):
+        """
+        Preprocess dataframe to get the stock1 and stockiary.
+
+        Args:
+            df: write your description
+            stock_list: write your description
+        """
         n = len(stock_list)
         N = df.shape[0]
         assert N % n == 0
@@ -44,6 +75,14 @@ class JoinQuantEngineer:
     # end_day: str
     # output: list of str_of_trade_day, e.g., ['2021-09-01', '2021-09-02']
     def calc_trade_days_by_joinquant(self, start_day, end_day):
+        """
+        Calc_trade_days_by_joinquant returns a list of dates for which the trade
+
+        Args:
+            self: write your description
+            start_day: write your description
+            end_day: write your description
+        """
         dates = jq.get_trade_days(start_day, end_day)
         str_dates = [date2str(dt) for dt in dates]
         return str_dates
@@ -52,6 +91,15 @@ class JoinQuantEngineer:
     # end_day: str
     # output: list of dataframes, e.g., [df1, df2]
     def read_data_from_csv(self, path_of_data, start_day, end_day):
+        """
+        Read data from CSV files.
+
+        Args:
+            self: write your description
+            path_of_data: write your description
+            start_day: write your description
+            end_day: write your description
+        """
         datasets = []
         selected_days = self.calc_trade_days_by_joinquant(start_day, end_day)
         filenames = calc_all_filenames(path_of_data)
@@ -71,6 +119,17 @@ class JoinQuantEngineer:
     def data_fetch_for_stocks(
         self, stocknames, start_day, end_day, read_data_from_local, path_of_data
     ):
+        """
+        Fetch data for a list of stocks
+
+        Args:
+            self: write your description
+            stocknames: write your description
+            start_day: write your description
+            end_day: write your description
+            read_data_from_local: write your description
+            path_of_data: write your description
+        """
         assert read_data_from_local in [0, 1]
         if read_data_from_local == 1:
             remove = 0

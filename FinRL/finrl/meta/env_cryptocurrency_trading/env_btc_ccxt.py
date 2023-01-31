@@ -20,6 +20,25 @@ class BitcoinEnv:  # custom env
         mode="train",
         gamma=0.99,
     ):
+        """
+        Initialize data.
+
+        Args:
+            self: write your description
+            data_cwd: write your description
+            price_ary: write your description
+            tech_ary: write your description
+            time_frequency: write your description
+            start: write your description
+            mid1: write your description
+            mid2: write your description
+            end: write your description
+            initial_account: write your description
+            max_stock: write your description
+            transaction_fee_percent: write your description
+            mode: write your description
+            gamma: write your description
+        """
         self.stock_dim = 1
         self.initial_account = initial_account
         self.transaction_fee_percent = transaction_fee_percent
@@ -51,6 +70,12 @@ class BitcoinEnv:  # custom env
         self.max_step = self.price_ary.shape[0]
 
     def reset(self) -> np.ndarray:
+        """
+        Reset the state of the simulation.
+
+        Args:
+            self: write your description
+        """
         self.day = 0
         self.day_price = self.price_ary[self.day]
         self.day_tech = self.tech_ary[self.day]
@@ -79,6 +104,13 @@ class BitcoinEnv:  # custom env
         return state
 
     def step(self, action) -> (np.ndarray, float, bool, None):
+        """
+        Take a step in the simulation.
+
+        Args:
+            self: write your description
+            action: write your description
+        """
         stock_action = action[0]
         """buy or sell stock"""
         adj = self.day_price[0]
@@ -129,6 +161,13 @@ class BitcoinEnv:  # custom env
         return state, reward, done, None
 
     def draw_cumulative_return(self, args, _torch) -> list:
+        """
+        Draws the cumulative return of the simulation.
+
+        Args:
+            self: write your description
+            _torch: write your description
+        """
         state_dim = self.state_dim
         action_dim = self.action_dim
 
@@ -176,6 +215,20 @@ class BitcoinEnv:  # custom env
     def load_data(
         self, data_cwd, price_ary, tech_ary, time_frequency, start, mid1, mid2, end
     ):
+        """
+        Load data from a file.
+
+        Args:
+            self: write your description
+            data_cwd: write your description
+            price_ary: write your description
+            tech_ary: write your description
+            time_frequency: write your description
+            start: write your description
+            mid1: write your description
+            mid2: write your description
+            end: write your description
+        """
         if data_cwd is not None:
             try:
                 price_ary = np.load(f"{data_cwd}/price_ary.npy")

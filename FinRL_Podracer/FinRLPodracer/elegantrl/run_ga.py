@@ -12,6 +12,15 @@ from elegantrl.replay import ReplayBufferMP
 
 class Arguments:
     def __init__(self, agent=None, env=None, if_on_policy=False):
+        """
+        Initializes the rollout with the given agent and environment.
+
+        Args:
+            self: write your description
+            agent: write your description
+            env: write your description
+            if_on_policy: write your description
+        """
         self.agent = agent  # Deep Reinforcement Learning algorithm
         self.env = env  # the environment for training
 
@@ -53,6 +62,13 @@ class Arguments:
         self.random_seed = 0  # initialize random seed in self.init_before_training()
 
     def init_before_training(self, if_main):
+        """
+        Initialize before training.
+
+        Args:
+            self: write your description
+            if_main: write your description
+        """
         if self.agent is None:
             raise RuntimeError('\n| Why agent=None? Assignment args.agent = AgentXXX please.')
         if not hasattr(self.agent, 'init'):
@@ -95,6 +111,11 @@ python3 demo.py   # cwd = ./demo_n
 
 
 def ga_evaluator():
+    """
+    Evaluate the average episode.
+
+    Args:
+    """
     ga_num = 8
 
     cwd_list = [f'./demo_{i}' for i in range(ga_num)]
@@ -129,6 +150,14 @@ def ga_evaluator():
 
 
 def save_and_load_for_ga(cwd, agent, buffer):
+    """
+    Save or load agent and buffer for GA.
+
+    Args:
+        cwd: write your description
+        agent: write your description
+        buffer: write your description
+    """
     agent.save_or_load_agent(cwd, if_save=True)
     buffer.save_or_load_history(cwd, if_save=True)
 
@@ -147,10 +176,27 @@ def save_and_load_for_ga(cwd, agent, buffer):
 
 class CommEvaluate:
     def __init__(self):
+        """
+        Initialize multiprocessing pipe.
+
+        Args:
+            self: write your description
+        """
         import multiprocessing as mp
         self.pipe = mp.Pipe()
 
     def evaluate_and_save0(self, act_cpu, evaluator, if_break_early, break_step, cwd):
+        """
+        Evaluate and save the evaluation.
+
+        Args:
+            self: write your description
+            act_cpu: write your description
+            evaluator: write your description
+            if_break_early: write your description
+            break_step: write your description
+            cwd: write your description
+        """
         act_cpu_dict, steps, r_exp, logging_tuple = self.pipe[0].recv()
 
         if act_cpu_dict is None:
@@ -167,6 +213,17 @@ class CommEvaluate:
         return if_train
 
     def evaluate_and_save1(self, agent_act, steps, r_exp, logging_tuple, if_train):
+        """
+        Evaluate and save the CPU.
+
+        Args:
+            self: write your description
+            agent_act: write your description
+            steps: write your description
+            r_exp: write your description
+            logging_tuple: write your description
+            if_train: write your description
+        """
         if self.pipe[1].poll():  # if_evaluator_idle
             if_train = self.pipe[1].recv()
 
@@ -180,6 +237,14 @@ class CommEvaluate:
 
 class CommExplore:
     def __init__(self, worker_num, if_on_policy):
+        """
+        Initialize the multiprocessing pipeline.
+
+        Args:
+            self: write your description
+            worker_num: write your description
+            if_on_policy: write your description
+        """
         import multiprocessing as mp
         self.pipe_list = [mp.Pipe() for _ in range(worker_num)]
 
@@ -193,6 +258,14 @@ class CommExplore:
             self.explore_env_update_buffer0 = self.explore0_off_policy
 
     def explore1_on_policy(self, agent, buffer_mp):
+        """
+        Run on - policy on the worker.
+
+        Args:
+            self: write your description
+            agent: write your description
+            buffer_mp: write your description
+        """
         act_dict = agent.act.state_dict()
         cri_dict = agent.cri.state_dict()
 
@@ -211,6 +284,18 @@ class CommExplore:
         return buffer_mp, steps, r_exp
 
     def explore0_on_policy(self, worker_id, agent, env, target_step, reward_scale, gamma):
+        """
+        Launches explore environment on policy policy.
+
+        Args:
+            self: write your description
+            worker_id: write your description
+            agent: write your description
+            env: write your description
+            target_step: write your description
+            reward_scale: write your description
+            gamma: write your description
+        """
         act_dict, cri_dict = self.pipe_list[worker_id][0].recv()
         agent.act.load_state_dict(act_dict)
         agent.cri.load_state_dict(cri_dict)
@@ -222,6 +307,14 @@ class CommExplore:
         self.pipe_list[worker_id][0].send((buffer_tuple, _steps, _r_exp))
 
     def explore1_off_policy(self, agent, buffer_mp):
+        """
+        Performs explore1 on policy.
+
+        Args:
+            self: write your description
+            agent: write your description
+            buffer_mp: write your description
+        """
         act_dict = agent.act.state_dict()
 
         for i in range(self.worker_num):
@@ -242,6 +335,18 @@ class CommExplore:
         return buffer_tuples, steps, r_exp
 
     def explore0_off_policy(self, worker_id, agent, env, target_step, reward_scale, gamma):
+        """
+        Launch the exploration of the environment with a given reward scale and policy.
+
+        Args:
+            self: write your description
+            worker_id: write your description
+            agent: write your description
+            env: write your description
+            target_step: write your description
+            reward_scale: write your description
+            gamma: write your description
+        """
         act_dict = self.pipe_list[worker_id][0].recv()
         agent.act.load_state_dict(act_dict)
 
@@ -256,6 +361,17 @@ class CommExplore:
         self.pipe_list[worker_id][0].send((state, other, _steps, _r_exp))
 
     def pre_explore1(self, agent, buffer_mp, batch_size, repeat_times, soft_update_tau):
+        """
+        This function is called by the worker threads when the agent starts to explore.
+
+        Args:
+            self: write your description
+            agent: write your description
+            buffer_mp: write your description
+            batch_size: write your description
+            repeat_times: write your description
+            soft_update_tau: write your description
+        """
         for i in range(self.worker_num):
             state, other = self.pipe_list[i][1].recv()
             buffer_mp.buffers[i].extend_buffer(state, other)
@@ -266,6 +382,18 @@ class CommExplore:
         agent.cri_target.load_state_dict(agent.cri.state_dict()) if agent.if_use_cri_target else None
 
     def pre_explore0(self, worker_id, agent, env, target_step, reward_scale, gamma):
+        """
+        Runs explore_before_training and sends the state and other to the first pipe.
+
+        Args:
+            self: write your description
+            worker_id: write your description
+            agent: write your description
+            env: write your description
+            target_step: write your description
+            reward_scale: write your description
+            gamma: write your description
+        """
         trajectory_list = explore_before_training(env, target_step, reward_scale, gamma)
         state = torch.as_tensor([item[0] for item in trajectory_list], dtype=torch.float32, device=agent.device)
         other = torch.as_tensor([item[1] for item in trajectory_list], dtype=torch.float32, device=agent.device)
@@ -520,6 +648,14 @@ def train_and_evaluate_mp(args):
 
 class CommGPU:
     def __init__(self, gpu_num, if_on_policy):
+        """
+        Initializes the GPU.
+
+        Args:
+            self: write your description
+            gpu_num: write your description
+            if_on_policy: write your description
+        """
         import multiprocessing as mp
         self.pipe_list = [mp.Pipe() for _ in range(gpu_num)]
         self.device_list = [torch.device(f'cuda:{i}') for i in range(gpu_num)]
@@ -546,6 +682,16 @@ class CommGPU:
             self.comm_buffer = self.comm_buffer_off_policy
 
     def comm_data(self, data, gpu_id, round_id, if_cuda=False):
+        """
+        Communicate data to a GPU
+
+        Args:
+            self: write your description
+            data: write your description
+            gpu_id: write your description
+            round_id: write your description
+            if_cuda: write your description
+        """
         idx = self.idx_l[gpu_id][round_id]
 
         data = [[t.to(self.device_list[idx]) for t in item]
@@ -555,16 +701,42 @@ class CommGPU:
         return self.pipe_list[gpu_id][1].recv()
 
     def comm_buffer_on_policy(self, buffer, buffer_tuples, gpu_id):
+        """
+        Gather data from the GPU and put it into the buffer
+
+        Args:
+            self: write your description
+            buffer: write your description
+            buffer_tuples: write your description
+            gpu_id: write your description
+        """
         buffer_tuples = self.comm_data(buffer_tuples, gpu_id, round_id=0, if_cuda=True)
         buffer.extend(buffer_tuples)
 
     def comm_buffer_off_policy(self, buffer, buffer_tuples, gpu_id):
+        """
+        Extend the given buffer with the data from the data source that was commuting on the given
+
+        Args:
+            self: write your description
+            buffer: write your description
+            buffer_tuples: write your description
+            gpu_id: write your description
+        """
         new_buffer = self.comm_data(buffer_tuples, gpu_id, round_id=0)
 
         for worker_i, (state, other) in enumerate(new_buffer):
             buffer.buffers[worker_i].extend_buffer(state, other)
 
     def comm_network_optim(self, agent, gpu_id):
+        """
+        Commence network with the given agent and update the network with the gpu_id.
+
+        Args:
+            self: write your description
+            agent: write your description
+            gpu_id: write your description
+        """
         for round_id in range(self.round_num):
             cri = agent.cri if (agent.cri is not agent.act) else None
             cri_optim = agent.cri_optim if (agent.cri_optim is not agent.act_optim) else None
@@ -588,6 +760,12 @@ class CommGPU:
             avg_update_net(agent.cri_target, data[5], agent.device) if agent.if_use_cri_target else None
 
     def close_itself(self):
+        """
+        Close the connection to the remote host.
+
+        Args:
+            self: write your description
+        """
         for pipe in self.pipe_list:
             for p in pipe:
                 try:
@@ -757,6 +935,12 @@ def train_and_evaluate_mg(args):
 
 
 def process_safely_terminate(process):
+    """
+    Terminate all processes in the process.
+
+    Args:
+        process: write your description
+    """
     for p in process:
         try:
             p.terminate()
@@ -766,6 +950,15 @@ def process_safely_terminate(process):
 
 
 def explore_before_training(env, target_step, reward_scale, gamma) -> (list, np.ndarray):  # for off-policy only
+    """
+    Runs the exploration step - wise until the target step is reached.
+
+    Args:
+        env: write your description
+        target_step: write your description
+        reward_scale: write your description
+        gamma: write your description
+    """
     trajectory_list = list()
 
     if_discrete = env.if_discrete
@@ -793,6 +986,12 @@ def explore_before_training(env, target_step, reward_scale, gamma) -> (list, np.
 
 
 def empty_pipe_list(pipe_list):
+    """
+    Empty a list of pipe objects.
+
+    Args:
+        pipe_list: write your description
+    """
     for pipe in pipe_list:
         try:
             while pipe.poll():
@@ -802,6 +1001,12 @@ def empty_pipe_list(pipe_list):
 
 
 def get_optim_parameters(optim):  # for avg_update_optim()
+    """
+    Returns a list of all parameters that are associated with the given optimizer.
+
+    Args:
+        optim: write your description
+    """
     params_list = list()
     for params_dict in optim.state_dict()['state'].values():
         params_list.extend([t for t in params_dict.values() if isinstance(t, torch.Tensor)])
@@ -809,22 +1014,54 @@ def get_optim_parameters(optim):  # for avg_update_optim()
 
 
 def avg_update_optim(dst_optim, src_optim, device):
+    """
+    Calculate the average update optim for the given device and parameters.
+
+    Args:
+        dst_optim: write your description
+        src_optim: write your description
+        device: write your description
+    """
     for dst, src in zip(get_optim_parameters(dst_optim), get_optim_parameters(src_optim)):
         dst.data.copy_((dst.data + src.data.to(device)) * 0.5)
         # dst.data.copy_(src.data * tau + dst.data * (1 - tau))
 
 
 def avg_update_net(dst_net, src_net, device):
+    """
+    Adjusts the net parameters to take the average update.
+
+    Args:
+        dst_net: write your description
+        src_net: write your description
+        device: write your description
+    """
     for dst, src in zip(dst_net.parameters(), src_net.parameters()):
         dst.data.copy_((dst.data + src.data.to(device)) * 0.5)
 
 
 def load_update_optim(dst_optim, src_optim, device):
+    """
+    Load and update optims.
+
+    Args:
+        dst_optim: write your description
+        src_optim: write your description
+        device: write your description
+    """
     for dst, src in zip(get_optim_parameters(dst_optim), get_optim_parameters(src_optim)):
         dst.data.copy_(src.data.to(device))
 
 
 def load_update_net(dst_net, src_net, device):
+    """
+    Loads the parameters from the source network into the destination network.
+
+    Args:
+        dst_net: write your description
+        src_net: write your description
+        device: write your description
+    """
     for dst, src in zip(dst_net.parameters(), src_net.parameters()):
         dst.data.copy_(src.data.to(device))
 

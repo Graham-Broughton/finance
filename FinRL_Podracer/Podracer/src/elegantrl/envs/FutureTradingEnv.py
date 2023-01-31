@@ -8,6 +8,12 @@ import pandas as pd
 
 class FutureTradingEnv:
     def __init__(self):
+        """
+        Load data from a CSV file.
+
+        Args:
+            self: write your description
+        """
         data_dir = "./pro_data"
 
         self.step_per_day = int(240 * (60 / 15))  # 240 min per day, 60 seconds per minute, 15 seconds per step
@@ -30,6 +36,12 @@ class FutureTradingEnv:
         self.position = 0
 
     def reset(self):
+        """
+        Reset the state of the instrument by random selection
+
+        Args:
+            self: write your description
+        """
         ary_len = self.ary_price.shape[0]
         i0 = rd.randint(self.look_back_step, ary_len - self.max_step)
         i1 = i0 + self.max_step
@@ -40,9 +52,21 @@ class FutureTradingEnv:
         return self.get_state()
 
     def step(self):
+        """
+        Step the simulation one step.
+
+        Args:
+            self: write your description
+        """
         pass
 
     def get_state(self):
+        """
+        Return the state of the instrument.
+
+        Args:
+            self: write your description
+        """
         price = self.ary_price[self.idx]
         time = self.ary_time[self.idx]
         end_sign = self.ary_end_sign[self.idx]
@@ -52,6 +76,12 @@ class FutureTradingEnv:
 
     @staticmethod
     def convert_csv_to_data_frame_to_array(data_dir="./pro_data"):
+        """
+        Convert a CSV file to a numpy array.
+
+        Args:
+            data_dir: write your description
+        """
         name = os.listdir(data_dir)[0]
 
         data = pd.read_csv(f"{data_dir}/{name}")
@@ -92,6 +122,11 @@ class FutureTradingEnv:
 
 
 def demo__convert_timestamp_to_date():
+    """
+    This demo shows how to convert a timestamp to a date.
+
+    Args:
+    """
     from datetime import datetime
 
     timestamp = 1234567890.0

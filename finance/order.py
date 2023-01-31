@@ -13,6 +13,13 @@ trade = ib.placeOrder(stock, order)
 print(trade)
 
 def orderFilled(trade, fill):
+    """
+    Prints order and fills
+
+    Args:
+        trade: write your description
+        fill: write your description
+    """
     print(f"Order: {order}")
     print('Order filled: ', fill)
 

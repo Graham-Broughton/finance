@@ -8,6 +8,12 @@ import numpy as np
 
 
 def lock_before_io(path):
+    """
+    Lock before io is available.
+
+    Args:
+        path: write your description
+    """
     lock_path = f"{path}.lock"
 
     while os.path.exists(lock_path):
@@ -16,11 +22,24 @@ def lock_before_io(path):
 
 
 def lock_after_io(path):
+    """
+    Remove the lock file after io is closed.
+
+    Args:
+        path: write your description
+    """
     lock_path = f"{path}.lock"
     os.remove(lock_path)
 
 
 def lock_copy(src_path, dst_path):
+    """
+    Recursively copies a file or directory.
+
+    Args:
+        src_path: write your description
+        dst_path: write your description
+    """
     lock_before_io(src_path)
     lock_before_io(dst_path)
 
@@ -30,6 +49,16 @@ def lock_copy(src_path, dst_path):
 
 
 def save_pod_info(info_path, pod_id, total_step, used_time, cumulative_rewards):
+    """
+    Saves pod information to a file.
+
+    Args:
+        info_path: write your description
+        pod_id: write your description
+        total_step: write your description
+        used_time: write your description
+        cumulative_rewards: write your description
+    """
     # info_path = f"{pod_path}/pod_info.dict"
     with open(info_path, 'a') as f:
         info_dict = {
@@ -43,6 +72,12 @@ def save_pod_info(info_path, pod_id, total_step, used_time, cumulative_rewards):
 
 
 def read_pod_info(path):
+    """
+    Read the pod_info. json file at the specified path and return the contents as a dictionary
+
+    Args:
+        path: write your description
+    """
     if os.path.exists(path):
         with open(path) as f:
             info_dict = eval(f.readlines()[-1])
@@ -52,6 +87,14 @@ def read_pod_info(path):
 
 
 def copy_top_n_to_pod(pod_paths, info_dicts, top_n=2):
+    """
+    Copy top_n files to each pod in the specified paths.
+
+    Args:
+        pod_paths: write your description
+        info_dicts: write your description
+        top_n: write your description
+    """
     pod_rs = [info_dict['cumulative_rewards_avg'] for info_dict in info_dicts]
     pod_rs_sort = np.argsort(pod_rs)
 
@@ -68,6 +111,11 @@ def copy_top_n_to_pod(pod_paths, info_dicts, top_n=2):
 
 
 def run():
+    """
+    Run the example
+
+    Args:
+    """
     pod_num = 4
     # pod_num = 16
     # pod_num = 80

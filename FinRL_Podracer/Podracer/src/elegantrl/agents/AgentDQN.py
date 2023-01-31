@@ -20,6 +20,16 @@ class AgentDQN(AgentBase):  # [ElegantRL.2022.04.18]
     """
 
     def __init__(self, net_dim: int, state_dim: int, action_dim: int, gpu_id: int = 0, args: Arguments = None):
+        """
+        Initializes the Agent.
+
+        Args:
+            self: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            gpu_id: write your description
+        """
         self.act_class = getattr(self, "act_class", QNet)
         self.cri_class = None  # means `self.cri = self.act`
         args.if_act_target = getattr(args, 'if_act_target', True)

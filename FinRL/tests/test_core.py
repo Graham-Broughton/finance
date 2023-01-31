@@ -19,36 +19,71 @@ from finrl.meta.preprocessor.yahoodownloader import YahooDownloader
 
 @pytest.fixture(scope="session")
 def DIRS():
+    """
+    Returns a list of directories to look for data files.
+
+    Args:
+    """
     return [DATA_SAVE_DIR, TRAINED_MODEL_DIR, TENSORBOARD_LOG_DIR, RESULTS_DIR]
 
 
 @pytest.fixture(scope="session")
 def ticker_list():
+    """
+    List of available tickers.
+
+    Args:
+    """
     return config_tickers.DOW_30_TICKER
 
 
 @pytest.fixture(scope="session")
 def ticker_list_small():
+    """
+    Ticker list with only small tickers.
+
+    Args:
+    """
     return ["AAPL", "GOOG"]
 
 
 @pytest.fixture(scope="session")
 def indicators():
+    """
+    Return a list of indicators.
+
+    Args:
+    """
     return config.INDICATORS
 
 
 @pytest.fixture(scope="session")
 def old_start_date():
+    """
+    Old start date.
+
+    Args:
+    """
     return "2009-01-01"
 
 
 @pytest.fixture(scope="session")
 def start_date():
+    """
+    Start date of the week.
+
+    Args:
+    """
     return "2021-01-01"
 
 
 @pytest.fixture(scope="session")
 def end_date():
+    """
+    End date of week.
+
+    Args:
+    """
     return "2021-10-31"
 
 

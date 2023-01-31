@@ -12,6 +12,15 @@ Array = np.ndarray
 
 class Evaluator:
     def __init__(self, cwd: str, agent_id: int, eval_env, args: Arguments):
+        """
+        Initializes the recorder.
+
+        Args:
+            self: write your description
+            cwd: write your description
+            agent_id: write your description
+            eval_env: write your description
+        """
         self.recorder = list()  # total_step, r_avg, r_std, obj_c, ...
         self.recorder_path = f'{cwd}/recorder.npy'
 
@@ -34,6 +43,16 @@ class Evaluator:
               f"{'expR':>8}{'objC':>7}{'etc.':>7}")
 
     def evaluate_save_and_plot(self, act, steps: int, r_exp: float, log_tuple: tuple) -> (bool, bool):
+        """
+        Saves the policy network in a file.
+
+        Args:
+            self: write your description
+            act: write your description
+            steps: write your description
+            r_exp: write your description
+            log_tuple: write your description
+        """
         self.total_step += steps  # update total training steps
 
         if time.time() - self.eval_time < self.eval_gap:
@@ -106,6 +125,13 @@ class Evaluator:
         return if_reach_goal, if_save
 
     def save_or_load_recoder(self, if_save: bool):
+        """
+        Save or load the recorder.
+
+        Args:
+            self: write your description
+            if_save: write your description
+        """
         if if_save:
             np.save(self.recorder_path, self.recorder)
         elif os.path.exists(self.recorder_path):
@@ -155,6 +181,15 @@ def save_learning_curve(
         recorder: list = None, cwd: str = '.',
         save_title: str = 'learning curve', fig_name: str = 'plot_learning_curve.jpg'
 ):
+    """
+    Saves the learning curve.
+
+    Args:
+        recorder: write your description
+        cwd: write your description
+        save_title: write your description
+        fig_name: write your description
+    """
     if recorder is None:
         recorder = np.load(f"{cwd}/recorder.npy")
 
@@ -224,6 +259,11 @@ def save_learning_curve(
 
 
 def demo_evaluator_actor_pth():
+    """
+    Example demonstrating elegantrl. agents. AgentPPO.
+
+    Args:
+    """
     import gym
     from elegantrl.agents.AgentPPO import AgentPPO
     from elegantrl.train.config import build_env
@@ -264,6 +304,17 @@ def demo_evaluator_actor_pth():
 
 
 def demo_evaluate_actors(dir_path: str, gpu_id: int, agent, env_args: dict, eval_times=2, net_dim=128):
+    """
+    Runs an agent and returns the evaluated actors.
+
+    Args:
+        dir_path: write your description
+        gpu_id: write your description
+        agent: write your description
+        env_args: write your description
+        eval_times: write your description
+        net_dim: write your description
+    """
     import gym
     from elegantrl.train.config import build_env
     # dir_path = './LunarLanderContinuous-v2_PPO_1'
@@ -313,6 +364,11 @@ def demo_evaluate_actors(dir_path: str, gpu_id: int, agent, env_args: dict, eval
 
 
 def demo_load_pendulum_and_render():
+    """
+    Example demonstrating how to load an elegantrl agent and render it.
+
+    Args:
+    """
     import gym
     import torch
     from elegantrl.agents.AgentPPO import AgentPPO
@@ -380,6 +436,11 @@ def demo_load_pendulum_and_render():
 
 
 def run():
+    """
+    Runs the example.
+
+    Args:
+    """
     from elegantrl.agents.AgentPPO import AgentPPO
     flag_id = 1  # int(sys.argv[1])
 

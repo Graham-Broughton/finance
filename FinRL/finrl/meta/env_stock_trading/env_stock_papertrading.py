@@ -32,6 +32,27 @@ class AlpacaPaperTrading:
         max_stock=1e2,
         latency=None,
     ):
+        """
+        Initializes the trading API.
+
+        Args:
+            self: write your description
+            ticker_list: write your description
+            time_interval: write your description
+            drl_lib: write your description
+            agent: write your description
+            cwd: write your description
+            net_dim: write your description
+            state_dim: write your description
+            action_dim: write your description
+            API_KEY: write your description
+            API_SECRET: write your description
+            API_BASE_URL: write your description
+            tech_indicator_list: write your description
+            turbulence_thresh: write your description
+            max_stock: write your description
+            latency: write your description
+        """
         # load agent
         self.drl_lib = drl_lib
         if agent == "ppo":
@@ -121,6 +142,13 @@ class AlpacaPaperTrading:
         self.equities = []
 
     def test_latency(self, test_times=10):
+        """
+        Test latency.
+
+        Args:
+            self: write your description
+            test_times: write your description
+        """
         total_time = 0
         for i in range(0, test_times):
             time0 = time.time()
@@ -133,6 +161,12 @@ class AlpacaPaperTrading:
         return latency
 
     def run(self):
+        """
+        Run the market simulation.
+
+        Args:
+            self: write your description
+        """
         orders = self.alpaca.list_orders(status="open")
         for order in orders:
             self.alpaca.cancel_order(order.id)
@@ -187,6 +221,12 @@ class AlpacaPaperTrading:
                 time.sleep(self.time_interval)
 
     def awaitMarketOpen(self):
+        """
+        Wait until market is open.
+
+        Args:
+            self: write your description
+        """
         isOpen = self.alpaca.get_clock().is_open
         while not isOpen:
             clock = self.alpaca.get_clock()
@@ -200,6 +240,12 @@ class AlpacaPaperTrading:
             isOpen = self.alpaca.get_clock().is_open
 
     def trade(self):
+        """
+        Trading the stock.
+
+        Args:
+            self: write your description
+        """
         state = self.get_state()
 
         if self.drl_lib == "elegantrl":
@@ -273,6 +319,12 @@ class AlpacaPaperTrading:
             self.stocks_cd[:] = 0
 
     def get_state(self):
+        """
+        Get the market state of the market.
+
+        Args:
+            self: write your description
+        """
         alpaca = AlpacaProcessor(api=self.alpaca)
         price, tech, turbulence = alpaca.fetch_latest_data(
             ticker_list=self.stockUniverse,
@@ -316,6 +368,16 @@ class AlpacaPaperTrading:
         return state
 
     def submitOrder(self, qty, stock, side, resp):
+        """
+        Submit an order to the Alpaca server.
+
+        Args:
+            self: write your description
+            qty: write your description
+            stock: write your description
+            side: write your description
+            resp: write your description
+        """
         if qty > 0:
             try:
                 self.alpaca.submit_order(stock, qty, side, "market", "day")
@@ -354,7 +416,20 @@ class AlpacaPaperTrading:
 
     @staticmethod
     def sigmoid_sign(ary, thresh):
+        """
+        Sigmoid function for thresholding the signal
+
+        Args:
+            ary: write your description
+            thresh: write your description
+        """
         def sigmoid(x):
+            """
+            Sigmoid function of the sigmoid function of the distribution.
+
+            Args:
+                x: write your description
+            """
             return 1 / (1 + np.exp(-x * np.e)) - 0.5
 
         return sigmoid(ary / thresh) * thresh
@@ -363,6 +438,13 @@ class AlpacaPaperTrading:
 class StockEnvEmpty(gym.Env):
     # Empty Env used for loading rllib agent
     def __init__(self, config):
+        """
+        Initializes the environment.
+
+        Args:
+            self: write your description
+            config: write your description
+        """
         state_dim = config["state_dim"]
         action_dim = config["action_dim"]
         self.env_num = 1
@@ -380,7 +462,20 @@ class StockEnvEmpty(gym.Env):
         )
 
     def reset(self):
+        """
+        Resets the state of the object to the default state.
+
+        Args:
+            self: write your description
+        """
         return
 
     def step(self, actions):
+        """
+        Step the environment forward.
+
+        Args:
+            self: write your description
+            actions: write your description
+        """
         return

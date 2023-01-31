@@ -56,6 +56,12 @@ class PreprocessEnv(gym.Wrapper):  # environment wrapper
 
 
 def deepcopy_or_rebuild_env(env):
+    """
+    Deep copies or rebuilds the environment.
+
+    Args:
+        env: write your description
+    """
     try:
         env_eval = deepcopy(env)
     except Exception as error:

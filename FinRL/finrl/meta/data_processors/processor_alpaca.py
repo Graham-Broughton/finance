@@ -10,6 +10,16 @@ from stockstats import StockDataFrame as Sdf
 
 class AlpacaProcessor:
     def __init__(self, API_KEY=None, API_SECRET=None, API_BASE_URL=None, api=None):
+        """
+        Initialize API object
+
+        Args:
+            self: write your description
+            API_KEY: write your description
+            API_SECRET: write your description
+            API_BASE_URL: write your description
+            api: write your description
+        """
         if api is None:
             try:
                 self.api = tradeapi.REST(API_KEY, API_SECRET, API_BASE_URL, "v2")
@@ -61,6 +71,13 @@ class AlpacaProcessor:
         return data_df
 
     def clean_data(self, df):
+        """
+        Clean up the dataframe for trading.
+
+        Args:
+            self: write your description
+            df: write your description
+        """
         tic_list = np.unique(df.tic.values)
 
         trading_days = self.get_trading_days(start=self.start, end=self.end)
@@ -155,6 +172,14 @@ class AlpacaProcessor:
             "close_60_sma",
         ],
     ):
+        """
+        Add technical indicator to DataFrame.
+
+        Args:
+            self: write your description
+            df: write your description
+            tech_indicator_list: write your description
+        """
         df = df.rename(columns={"timestamp": "date"})
         df = df.copy()
         df = df.sort_values(by=["tic", "date"])
@@ -183,6 +208,13 @@ class AlpacaProcessor:
         return df
 
     def add_vix(self, data):
+        """
+        Add data frame to the dataframe that contains VIX data.
+
+        Args:
+            self: write your description
+            data: write your description
+        """
         vix_df = self.download_data(["VIXY"], self.start, self.end, self.time_interval)
         cleaned_vix = self.clean_data(vix_df)
         vix = cleaned_vix[["timestamp", "close"]]
@@ -194,6 +226,14 @@ class AlpacaProcessor:
         return df
 
     def calculate_turbulence(self, data, time_period=252):
+        """
+        Calculate turbulence for a given time period using the price pivot table.
+
+        Args:
+            self: write your description
+            data: write your description
+            time_period: write your description
+        """
         # can add other market assets
         df = data.copy()
         df_price_pivot = df.pivot(index="date", columns="tic", values="close")
@@ -254,6 +294,15 @@ class AlpacaProcessor:
         return df
 
     def df_to_array(self, df, tech_indicator_list, if_vix):
+        """
+        Transforms a dataframe to a numpy array.
+
+        Args:
+            self: write your description
+            df: write your description
+            tech_indicator_list: write your description
+            if_vix: write your description
+        """
         df = df.copy()
         unique_ticker = df.tic.unique()
         if_first_time = True
@@ -277,6 +326,14 @@ class AlpacaProcessor:
         return price_array, tech_array, turbulence_array
 
     def get_trading_days(self, start, end):
+        """
+        Get a list of trading days between the given dates.
+
+        Args:
+            self: write your description
+            start: write your description
+            end: write your description
+        """
         nyse = tc.get_calendar("NYSE")
         df = nyse.sessions_in_range(
             pd.Timestamp(start, tz=pytz.UTC), pd.Timestamp(end, tz=pytz.UTC)
@@ -290,6 +347,16 @@ class AlpacaProcessor:
     def fetch_latest_data(
         self, ticker_list, time_interval, tech_indicator_list, limit=100
     ) -> pd.DataFrame:
+        """
+        Fetch latest prices technical turbulence.
+
+        Args:
+            self: write your description
+            ticker_list: write your description
+            time_interval: write your description
+            tech_indicator_list: write your description
+            limit: write your description
+        """
 
         data_df = pd.DataFrame()
         for tic in ticker_list:
